@@ -1,6 +1,7 @@
 """
 RegRadar — Compliance Item Routes
 CRUD for the applicability matrix entries.
+Protected by JWT auth — creation requires CA role, listing is open to authenticated users.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -9,7 +10,8 @@ from sqlalchemy import select, func
 from uuid import UUID
 from typing import Optional
 from app.core.database import get_db
-from app.models.models import ComplianceItem
+from app.core.deps import get_current_user, require_ca
+from app.models.models import ComplianceItem, User
 from app.models.enums import UrgencyLevel
 from app.schemas.schemas import (
     ComplianceItemCreate, ComplianceItemResponse, PaginatedResponse,
@@ -21,9 +23,10 @@ router = APIRouter()
 @router.post("/", response_model=ComplianceItemResponse, status_code=201)
 async def create_compliance_item(
     item_in: ComplianceItemCreate,
+    current_user: User = Depends(require_ca),
     db: AsyncSession = Depends(get_db),
 ):
-    """Add a new compliance item to the applicability matrix."""
+    """Add a new compliance item to the applicability matrix (CA/Admin only)."""
     # Check unique compliance_id
     existing = await db.execute(
         select(ComplianceItem).where(
@@ -49,9 +52,10 @@ async def list_compliance_items(
     regulatory_body: Optional[str] = None,
     urgency_level: Optional[UrgencyLevel] = None,
     verified_only: bool = False,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List compliance items with filters."""
+    """List compliance items with filters (any authenticated user)."""
     query = select(ComplianceItem).where(ComplianceItem.is_active == True)
 
     if regulatory_body:
@@ -82,7 +86,11 @@ async def list_compliance_items(
 
 
 @router.get("/{item_id}", response_model=ComplianceItemResponse)
-async def get_compliance_item(item_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_compliance_item(
+    item_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(
         select(ComplianceItem).where(ComplianceItem.id == item_id)
     )
