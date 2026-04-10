@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
 
     # ── Database ─────────────────────────────────────────────────────
-    DATABASE_URL: str = "postgresql+asyncpg://regradar:regradar_secret@localhost:5432/regradar"
-    DATABASE_URL_SYNC: str = "postgresql://regradar:regradar_secret@localhost:5432/regradar"
+    DATABASE_URL: str = "postgresql+asyncpg://regradar:regradar_secret@localhost:5433/regradar"
+    DATABASE_URL_SYNC: str = "postgresql://regradar:regradar_secret@localhost:5433/regradar"
 
     # ── Redis / Celery ───────────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6379/0"
