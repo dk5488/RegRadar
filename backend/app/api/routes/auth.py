@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
+from app.core.deps import get_current_user
 from app.models.models import User
 from app.schemas.schemas import UserCreate, UserLogin, TokenResponse, UserResponse
 
@@ -65,7 +66,6 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user():
+async def me(current_user: User = Depends(get_current_user)):
     """Get the currently authenticated user's profile."""
-    # TODO: Implement auth dependency
-    raise HTTPException(status_code=501, detail="Auth dependency not yet wired")
+    return current_user

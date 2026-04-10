@@ -1,6 +1,7 @@
 """
 RegRadar — Document Routes
 View fetched documents and their LLM extraction results.
+Protected by JWT auth — review actions require CA role.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -10,7 +11,8 @@ from uuid import UUID
 from datetime import datetime, timezone
 from typing import Optional
 from app.core.database import get_db
-from app.models.models import Document
+from app.core.deps import get_current_user, require_ca
+from app.models.models import Document, User
 from app.models.enums import DocumentStatus
 from app.schemas.schemas import DocumentResponse, DocumentReview, PaginatedResponse
 
@@ -23,6 +25,7 @@ async def list_documents(
     source_id: Optional[UUID] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """List fetched regulatory documents."""
@@ -54,7 +57,11 @@ async def list_documents(
 
 
 @router.get("/{doc_id}", response_model=DocumentResponse)
-async def get_document(doc_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_document(
+    doc_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(select(Document).where(Document.id == doc_id))
     doc = result.scalar_one_or_none()
     if not doc:
@@ -66,6 +73,7 @@ async def get_document(doc_id: UUID, db: AsyncSession = Depends(get_db)):
 async def review_document(
     doc_id: UUID,
     review: DocumentReview,
+    current_user: User = Depends(require_ca),
     db: AsyncSession = Depends(get_db),
 ):
     """CA reviewer approves, edits, or rejects a processed document."""
@@ -95,7 +103,7 @@ async def review_document(
 
     doc.review_notes = review.review_notes
     doc.reviewed_at = datetime.now(timezone.utc)
-    # TODO: set reviewer_id from auth context
+    doc.reviewer_id = current_user.id
     await db.flush()
     await db.refresh(doc)
     return doc
