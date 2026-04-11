@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
-from app.api.routes import auth, business_profiles, compliance, alerts, documents, ca_dashboard
+from app.api.routes import auth, business_profiles, compliance, alerts, documents, ca_dashboard, scraper_health
 
 settings = get_settings()
 logger = get_logger(__name__)
@@ -59,6 +59,9 @@ app.include_router(
 )
 app.include_router(
     ca_dashboard.router, prefix="/api/v1/ca", tags=["CA Dashboard"]
+)
+app.include_router(
+    scraper_health.router, prefix="/api/v1/health", tags=["Scraper Health"]
 )
 
 
