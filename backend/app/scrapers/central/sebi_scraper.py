@@ -32,12 +32,19 @@ class SEBIScraper(BaseScraper):
                 
                 if is_matched and title:
                     full_url = href if href.startswith("http") else f"{self.base_url.rstrip('/')}/{href.lstrip('/')}"
-                    documents.append(RawDocument(
-                        url=full_url,
-                        title=title,
-                        raw_text=title,
-                        content_type="application/pdf" if href.lower().endswith(".pdf") else "text/html"
-                    ))
+                    title = link.get_text(strip=True)
+                if not title or len(title) < 5:
+                    continue
+                    
+                if self.is_valuable_compliance_document(title, href):
+                    documents.append(
+                        RawDocument(
+                            url=full_url,
+                            title=title,
+                            raw_text=title,
+                            content_type="application/pdf" if href.lower().endswith(".pdf") else "text/html"
+                        )
+                    )
             logger.info("SEBIScraper fetch complete", doc_count=len(documents))
         except Exception as e:
             logger.error(f"Failed to fetch SEBIScraper", error=str(e))

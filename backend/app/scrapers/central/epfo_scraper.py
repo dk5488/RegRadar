@@ -25,20 +25,11 @@ class EPFOScraper(BaseScraper):
                 href = link.get("href", "")
                 title = link.get_text(strip=True)[:200]
                 
-                # Strict filtering constraint for MSME Compliance Value (Exclude internal admin/tenders)
-                noise_words = ["tender", "recruitment", "vacancy", "syllabus", "auction", "seniority", "promotion", "empanelment", "appointment", "sports", "result"]
-                is_noise = any(kw in title.lower() or kw in href.lower() for kw in noise_words)
-                
-                is_matched = (
-                    href.lower().endswith(".pdf") and not is_noise and
-                    any(kw in href.lower() or kw in title.lower() for kw in ["circular", "notification", "order", "rule", "amendment", "gazette", "compliance", "guideline", "pension", "contribution"])
-                )
-                
-                if is_matched and title:
+                if self.is_valuable_compliance_document(title, href):
                     full_url = href if href.startswith("http") else f"{self.base_url.rsplit('/', 1)[0]}/{href.lstrip('/')}"
                     documents.append(RawDocument(
                         url=full_url,
-                        title=title[:200],
+                        title=title,
                         raw_text=title,
                         content_type="application/pdf"
                     ))
