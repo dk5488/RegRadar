@@ -151,6 +151,8 @@ class CBICScraper(BaseScraper):
             title = article.get_text(strip=True)[:200]
             
             if href.lower().endswith(".pdf") or "press" in href.lower():
+                if not self.is_valuable_compliance_document(title, href):
+                    continue
                 full_url = self._resolve_url(href, "https://gstcouncil.gov.in")
                 documents.append(
                     RawDocument(
@@ -166,14 +168,16 @@ class CBICScraper(BaseScraper):
             for link in soup.find_all("a", href=True):
                 href = link.get("href", "")
                 if href.lower().endswith(".pdf"):
-                    documents.append(
-                        RawDocument(
-                            url=self._resolve_url(href, "https://gstcouncil.gov.in"),
-                            title=link.get_text(strip=True)[:200] or href.split("/")[-1],
-                            raw_text=link.get_text(strip=True) or href.split("/")[-1],
-                            content_type="application/pdf",
+                    title_text = link.get_text(strip=True)[:200] or href.split("/")[-1]
+                    if self.is_valuable_compliance_document(title_text, href):
+                        documents.append(
+                            RawDocument(
+                                url=self._resolve_url(href, "https://gstcouncil.gov.in"),
+                                title=title_text,
+                                raw_text=link.get_text(strip=True) or href.split("/")[-1],
+                                content_type="application/pdf",
+                            )
                         )
-                    )
 
         return documents
 

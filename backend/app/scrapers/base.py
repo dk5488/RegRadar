@@ -137,5 +137,36 @@ class BaseScraper(abc.ABC):
             except TypeError:
                 self._session.close()
 
+    def is_valuable_compliance_document(self, title: str, url: str) -> bool:
+        """Determines if a document is a valuable compliance regulation for businesses/MSMEs."""
+        import re
+        combined = f"{title} {url}".lower()
+        
+        # Ignore completely empty or stub titles unless url explicitly contains keywords
+        if len(title.strip()) < 5 and not any(k in url.lower() for k in ["circular", "notification", "order"]):
+            return False
+            
+        noise_words = [
+            "tender", "recruitment", "vacancy", "syllabus", "auction", 
+            "seniority", "promotion", "appointment", "empanelment", 
+            "sports", "result", "vigilance", "awareness", "presentation", 
+            "contest", "yatra", "organisational structure", "download the", 
+            "read", "event", "seminar", "holiday", "celebration", "award",
+            "offline-payment-process", "helpkit"
+        ]
+        
+        if any(re.search(rf'\b{re.escape(noise)}\b', combined) for noise in noise_words):
+            return False
+                
+        value_words = [
+            "circular", "notification", "order", "master direction", 
+            "rule", "amendment", "gazette", "guideline", "sop", 
+            "compliance", "contribution", "wage", "framework", 
+            "act", "tax", "policy", "statutory",
+            "clarification", "modification"
+        ]
+        
+        return any(re.search(rf'\b{re.escape(val)}\b', combined) for val in value_words)
+
     def __repr__(self):
         return f"<{self.__class__.__name__} source='{self.source_name}'>"

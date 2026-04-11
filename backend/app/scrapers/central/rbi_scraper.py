@@ -119,16 +119,17 @@ class RBIScraper(BaseScraper):
         soup = BeautifulSoup(response.text, "lxml")
         documents = []
 
-        for link in soup.find_all("a", href=True):
+        for link in soup.find_all("a", class_="tableheader"):
             href = link.get("href", "")
-            text = link.get_text(strip=True)
-            if text and ("press" in href.lower() or href.endswith(".pdf")):
-                full_url = self._resolve_url(href)
+            title = link.get_text(strip=True)
+            
+            if self.is_valuable_compliance_document(title, href):
+                full_url = f"https://www.rbi.org.in/Scripts/{href}" if not href.startswith("http") else href
                 documents.append(
                     RawDocument(
                         url=full_url,
-                        title=text[:200],
-                        raw_text=text,
+                        title=title,
+                        raw_text=title,
                     )
                 )
 

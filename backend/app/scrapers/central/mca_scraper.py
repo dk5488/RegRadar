@@ -127,13 +127,15 @@ class MCAScraper(BaseScraper):
         if not documents:
             for link in soup.find_all("a", href=True):
                 href = link.get("href", "")
-                if ".pdf" in href.lower():
+                title = link.get_text(strip=True)[:200] or href.split("/")[-1]
+                
+                if ".pdf" in href.lower() and self.is_valuable_compliance_document(title, href):
                     full_url = self._resolve_url(href, base_url)
                     documents.append(
                         RawDocument(
                             url=full_url,
-                            title=link.get_text(strip=True)[:200] or href.split("/")[-1],
-                            raw_text=link.get_text(strip=True) or href.split("/")[-1],
+                            title=title,
+                            raw_text=title,
                             content_type="application/pdf",
                         )
                     )
