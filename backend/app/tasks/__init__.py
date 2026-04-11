@@ -419,6 +419,18 @@ def _get_scraper_instance(source):
     except ImportError:
         pass
 
+    try:
+        from app.scrapers.state.karnataka_scraper import KarnatakaScraper
+        SCRAPER_REGISTRY["karnataka_scraper"] = KarnatakaScraper
+    except ImportError:
+        pass
+
+    try:
+        from app.scrapers.state.maharashtra_scraper import MaharashtraScraper
+        SCRAPER_REGISTRY["maharashtra_scraper"] = MaharashtraScraper
+    except ImportError:
+        pass
+
     module_name = source.scraper_module_name
     scraper_class = SCRAPER_REGISTRY.get(module_name)
 

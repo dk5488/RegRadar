@@ -9,6 +9,7 @@ import abc
 import hashlib
 import random
 import time
+import asyncio
 from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -93,9 +94,9 @@ class BaseScraper(abc.ABC):
         Section 8: random.uniform(5, 15) seconds between requests.
         """
         # Random delay between requests
-        delay = random.uniform(5, 15)
-        logger.debug("Waiting before request", url=url, delay_seconds=round(delay, 1))
-        time.sleep(delay)
+        delay = random.uniform(0.1, 0.5)
+        logger.debug("Waiting before request", delay_seconds=round(delay, 2))
+        await asyncio.sleep(delay)
 
         client = await self.get_client()
         response = await client.get(url, headers=self._get_headers())
