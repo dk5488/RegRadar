@@ -1,0 +1,63 @@
+
+--- Testing MCAScraper ---
+2026-04-11 13:24:34 [debug    ] Waiting before request         delay_seconds=0.23
+2026-04-11 13:24:38 [debug    ] Waiting before request         delay_seconds=0.14
+2026-04-11 13:24:42 [debug    ] Waiting before request         delay_seconds=0.36
+2026-04-11 13:24:43 [error    ] Failed to fetch MCA primary page error=RetryError[<Future at 0x1cfa534cb10 state=finished raised HTTPStatusError>]
+2026-04-11 13:24:43 [debug    ] Waiting before request         delay_seconds=0.18
+2026-04-11 13:24:47 [debug    ] Waiting before request         delay_seconds=0.27
+2026-04-11 13:24:52 [debug    ] Waiting before request         delay_seconds=0.37
+2026-04-11 13:24:52 [warning  ] Failed to fetch MCA secondary page error=RetryError[<Future at 0x1cfa5362410 state=finished raised HTTPStatusError>] url=https://www.mca.gov.in/MinistryV2/notification.html
+2026-04-11 13:24:52 [info     ] MCA fetch complete             total_unique=0
+Found 0 documents.
+
+--- Testing CBICScraper ---
+2026-04-11 13:24:52 [debug    ] Waiting before request         delay_seconds=0.15
+2026-04-11 13:24:56 [debug    ] Waiting before request         delay_seconds=0.36
+2026-04-11 13:25:01 [debug    ] Waiting before request         delay_seconds=0.37
+2026-04-11 13:25:01 [error    ] Failed to fetch CBIC index     error=RetryError[<Future at 0x1cfa534e290 state=finished raised HTTPStatusError>]
+2026-04-11 13:25:01 [debug    ] Waiting before request         delay_seconds=0.46
+2026-04-11 13:25:02 [debug    ] Waiting before request         delay_seconds=0.37
+2026-04-11 13:25:02 [debug    ] Waiting before request         delay_seconds=0.26
+2026-04-11 13:25:02 [debug    ] Waiting before request         delay_seconds=0.46
+2026-04-11 13:25:04 [info     ] CBIC fetch complete            total_documents=1
+Found 1 documents.
+  1. Archive... - /archive-press-release
+
+--- Testing RBIScraper ---
+2026-04-11 13:25:04 [debug    ] Waiting before request         delay_seconds=0.14
+2026-04-11 13:25:09 [debug    ] Waiting before request         delay_seconds=0.14
+2026-04-11 13:25:13 [debug    ] Waiting before request         delay_seconds=0.19
+2026-04-11 13:25:13 [warning  ] RBI RSS feed failed, falling back to scraper error=RetryError[<Future at 0x1cfa540ed50 state=finished raised HTTPStatusError>]
+2026-04-11 13:25:13 [debug    ] Waiting before request         delay_seconds=0.4
+2026-04-11 13:25:14 [debug    ] Waiting before request         delay_seconds=0.14
+Found 0 documents.
+
+--- Testing KarnatakaScraper ---
+2026-04-11 13:25:15 [debug    ] Waiting before request         delay_seconds=0.45
+2026-04-11 13:25:17 [info     ] Karnataka Labour page fetched  doc_count=23
+2026-04-11 13:25:17 [debug    ] Waiting before request         delay_seconds=0.26
+2026-04-11 13:25:22 [debug    ] Waiting before request         delay_seconds=0.45
+2026-04-11 13:25:27 [debug    ] Waiting before request         delay_seconds=0.28
+2026-04-11 13:25:27 [error    ] Failed to fetch Karnataka Commercial Taxes page error=RetryError[<Future at 0x1cfa55b1710 state=finished raised ConnectError>] url=https://ctax.kar.nic.in
+2026-04-11 13:25:27 [info     ] Karnataka fetch complete       total_unique=14
+Found 14 documents.
+Error running KarnatakaScraper: 'charmap' codec can't encode characters in position 5-10: character maps to <undefined>
+
+--- Testing MaharashtraScraper ---
+2026-04-11 13:25:27 [debug    ] Waiting before request         delay_seconds=0.16
+2026-04-11 13:25:43 [debug    ] Waiting before request         delay_seconds=0.18
+2026-04-11 13:25:58 [debug    ] Waiting before request         delay_seconds=0.29
+2026-04-11 13:26:09 [error    ] Failed to fetch Maharashtra Labour page error=RetryError[<Future at 0x1cfa55bc250 state=finished raised ConnectError>]
+2026-04-11 13:26:09 [debug    ] Waiting before request         delay_seconds=0.49
+2026-04-11 13:26:11 [info     ] Maharashtra secondary page fetched doc_count=39 url=https://mahagst.gov.in
+2026-04-11 13:26:11 [debug    ] Waiting before request         delay_seconds=0.1
+2026-04-11 13:26:27 [debug    ] Waiting before request         delay_seconds=0.26
+2026-04-11 13:26:42 [debug    ] Waiting before request         delay_seconds=0.12
+2026-04-11 13:26:53 [error    ] Failed to fetch Maharashtra secondary page error=RetryError[<Future at 0x1cfa55cf490 state=finished raised ConnectError>] url=https://egazette.maharashtra.gov.in
+2026-04-11 13:26:53 [info     ] Maharashtra fetch complete     total_unique=35
+Found 35 documents.
+  1. *** PTRC return filing periodicity for F.Y.-2026-27 is now available in æWhats N... - https://www.mahagst.gov.in/public/uploads/notifications/177583831069d924667f323PROPOSED PTRC PERIODICITY 2026-27.xlsx
+  2. ***   Relaxation in Registration and filing of returns under Maharashtra Tax on ... - https://www.mahagst.gov.in/public/uploads/notifications/177384101569baaa774253fRelaxation in Registration and filing of returns under Maharashtra Tax on Trade, Callings and Proffesion Act-reg.pdf
+  3. *** Helpdesk Service Request - User Manual ***... - https://www.mahagst.gov.in/public/uploads/notifications/177384084369baa9cba19ecHelpdesk Module - User Manual.pdf
+  ... and 32 more.
