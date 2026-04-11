@@ -24,19 +24,15 @@ class CBICScraper(BaseScraper):
     """
 
     source_name = "CBIC / GST Council"
-    base_url = "https://www.cbic.gov.in/htdocs-cbec/gst/index.htm"
+    base_url = "https://gstcouncil.gov.in/press-release"
     fetch_frequency_hours = 12
     requires_pdf_extraction = True
     requires_ocr_fallback = False
 
     # Notification type pages to check
     NOTIFICATION_URLS = [
-        # Central Tax
-        "https://www.cbic.gov.in/htdocs-cbec/gst/central-tax-notifications",
-        # Rate notifications
-        "https://www.cbic.gov.in/htdocs-cbec/gst/central-tax-rate",
-        # Circulars
-        "https://www.cbic.gov.in/htdocs-cbec/gst/cgst-circ",
+        "https://gstcouncil.gov.in/gst-circulars",
+        "https://gstcouncil.gov.in/gst-notifications"
     ]
 
     async def fetch(self) -> List[RawDocument]:
@@ -150,14 +146,18 @@ class CBICScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
         documents = []
 
-        for article in soup.find_all(["article", "div"], class_=lambda c: c and "press" in str(c).lower()):
-            link = article.find("a", href=True)
-            if link:
+        for article in soup.find_all("a", href=True):
+            href = article.get("href", "")
+            title = article.get_text(strip=True)[:200]
+            
+            if href.lower().endswith(".pdf") or "press" in href.lower():
+                full_url = self._resolve_url(href, "https://gstcouncil.gov.in")
                 documents.append(
                     RawDocument(
-                        url=link["href"],
-                        title=link.get_text(strip=True)[:200],
-                        raw_text=article.get_text(strip=True),
+                        url=full_url,
+                        title=title or href.split("/")[-1],
+                        raw_text=title or href.split("/")[-1],
+                        content_type="application/pdf" if href.endswith(".pdf") else "text/html",
                     )
                 )
 
@@ -165,12 +165,12 @@ class CBICScraper(BaseScraper):
         if not documents:
             for link in soup.find_all("a", href=True):
                 href = link.get("href", "")
-                if href.endswith(".pdf"):
+                if href.lower().endswith(".pdf"):
                     documents.append(
                         RawDocument(
-                            url=href,
-                            title=link.get_text(strip=True)[:200],
-                            raw_text=link.get_text(strip=True),
+                            url=self._resolve_url(href, "https://gstcouncil.gov.in"),
+                            title=link.get_text(strip=True)[:200] or href.split("/")[-1],
+                            raw_text=link.get_text(strip=True) or href.split("/")[-1],
                             content_type="application/pdf",
                         )
                     )
