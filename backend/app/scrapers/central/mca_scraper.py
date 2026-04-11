@@ -35,6 +35,7 @@ class MCAScraper(BaseScraper):
 
     SECONDARY_URLS = [
         "https://www.mca.gov.in/MinistryV2/notification.html",
+        "https://www.mca.gov.in/content/mca/global/en/home.html",
     ]
 
     async def fetch(self) -> List[RawDocument]:
@@ -126,13 +127,13 @@ class MCAScraper(BaseScraper):
         if not documents:
             for link in soup.find_all("a", href=True):
                 href = link.get("href", "")
-                if href.lower().endswith(".pdf"):
+                if ".pdf" in href.lower():
                     full_url = self._resolve_url(href, base_url)
                     documents.append(
                         RawDocument(
                             url=full_url,
-                            title=link.get_text(strip=True)[:200] or "MCA PDF",
-                            raw_text=link.get_text(strip=True),
+                            title=link.get_text(strip=True)[:200] or href.split("/")[-1],
+                            raw_text=link.get_text(strip=True) or href.split("/")[-1],
                             content_type="application/pdf",
                         )
                     )
