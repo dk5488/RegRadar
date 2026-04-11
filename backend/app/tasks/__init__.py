@@ -426,8 +426,47 @@ def _get_scraper_instance(source):
         pass
 
     try:
+        from app.scrapers.state.karnataka_scraper import KarnatakaScraper
+        SCRAPER_REGISTRY["karnataka_scraper"] = KarnatakaScraper
+    except ImportError:
+        pass
+
+    try:
         from app.scrapers.state.maharashtra_scraper import MaharashtraScraper
         SCRAPER_REGISTRY["maharashtra_scraper"] = MaharashtraScraper
+    except ImportError:
+        pass
+
+    try:
+        from app.scrapers.central.sebi_scraper import SEBIScraper
+        from app.scrapers.central.epfo_scraper import EPFOScraper
+        from app.scrapers.central.esic_scraper import ESICScraper
+        from app.scrapers.central.labour_central_scraper import LabourCentralScraper
+        from app.scrapers.central.dpiit_scraper import DPIITScraper
+        from app.scrapers.central.incometax_scraper import IncomeTaxScraper
+        from app.scrapers.central.gazette_scraper import GazetteScraper
+        from app.scrapers.central.dgft_scraper import DGFTScraper
+        from app.scrapers.central.fssai_scraper import FSSAIScraper
+        from app.scrapers.central.bis_scraper import BISScraper
+        from app.scrapers.central.irdai_scraper import IRDAIScraper
+        from app.scrapers.state.tamilnadu_scraper import TamilNaduScraper
+        from app.scrapers.state.delhi_scraper import DelhiScraper
+        from app.scrapers.state.gujarat_scraper import GujaratScraper
+
+        SCRAPER_REGISTRY['sebi_scraper'] = SEBIScraper
+        SCRAPER_REGISTRY['epfo_scraper'] = EPFOScraper
+        SCRAPER_REGISTRY['esic_scraper'] = ESICScraper
+        SCRAPER_REGISTRY['labour_central_scraper'] = LabourCentralScraper
+        SCRAPER_REGISTRY['dpiit_scraper'] = DPIITScraper
+        SCRAPER_REGISTRY['incometax_scraper'] = IncomeTaxScraper
+        SCRAPER_REGISTRY['gazette_scraper'] = GazetteScraper
+        SCRAPER_REGISTRY['dgft_scraper'] = DGFTScraper
+        SCRAPER_REGISTRY['fssai_scraper'] = FSSAIScraper
+        SCRAPER_REGISTRY['bis_scraper'] = BISScraper
+        SCRAPER_REGISTRY['irdai_scraper'] = IRDAIScraper
+        SCRAPER_REGISTRY['tamilnadu_scraper'] = TamilNaduScraper
+        SCRAPER_REGISTRY['delhi_scraper'] = DelhiScraper
+        SCRAPER_REGISTRY['gujarat_scraper'] = GujaratScraper
     except ImportError:
         pass
 
