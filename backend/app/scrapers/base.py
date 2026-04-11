@@ -14,7 +14,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import datetime, timezone
 
-import httpx
+from curl_cffi.requests import AsyncSession
+from curl_cffi import requests as cffi_requests
 from tenacity import retry, stop_after_attempt, wait_exponential
 from app.core.logging import get_logger
 
@@ -63,17 +64,18 @@ class BaseScraper(abc.ABC):
 
     def __init__(self, proxy_url: Optional[str] = None):
         self.proxy_url = proxy_url
-        self._session: Optional[httpx.AsyncClient] = None
+        self._session: Optional[AsyncSession] = None
 
-    async def get_client(self) -> httpx.AsyncClient:
-        """Create or return an httpx async client with anti-blocking headers."""
-        if self._session is None or self._session.is_closed:
-            proxies = self.proxy_url if self.proxy_url else None
-            self._session = httpx.AsyncClient(
-                timeout=httpx.Timeout(self.request_timeout),
-                proxy=proxies,
-                follow_redirects=True,
+    async def get_client(self) -> AsyncSession:
+        """Create or return an AsyncSession with anti-blocking headers and TLS impersonation."""
+        if self._session is None or self._session._closed:
+            proxies = {"http": self.proxy_url, "https": self.proxy_url} if self.proxy_url else None
+            self._session = AsyncSession(
+                timeout=self.request_timeout,
+                proxies=proxies,
+                impersonate="chrome",
                 headers=self._get_headers(),
+                verify=False
             )
         return self._session
 
@@ -88,10 +90,9 @@ class BaseScraper(abc.ABC):
         }
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=30))
-    async def safe_get(self, url: str) -> httpx.Response:
+    async def safe_get(self, url: str) -> "cffi_requests.Response":
         """
         GET request with retry logic and random delay.
-        Section 8: random.uniform(5, 15) seconds between requests.
         """
         # Random delay between requests
         delay = random.uniform(0.1, 0.5)
@@ -130,8 +131,8 @@ class BaseScraper(abc.ABC):
 
     async def close(self):
         """Close the HTTP client."""
-        if self._session and not self._session.is_closed:
-            await self._session.aclose()
+        if self._session and not self._session._closed:
+            self._session.close()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} source='{self.source_name}'>"
