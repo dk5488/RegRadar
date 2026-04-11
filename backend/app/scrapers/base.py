@@ -132,7 +132,10 @@ class BaseScraper(abc.ABC):
     async def close(self):
         """Close the HTTP client."""
         if self._session and not self._session._closed:
-            self._session.close()
+            try:
+                await self._session.close()
+            except TypeError:
+                self._session.close()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} source='{self.source_name}'>"
