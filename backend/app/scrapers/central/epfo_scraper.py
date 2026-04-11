@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 class EPFOScraper(BaseScraper):
     source_name = "EPFO — Employees Provident Fund Organisation"
-    base_url = "https://www.epfindia.gov.in/site_en/Circulars.php"
+    base_url = "https://www.epfindia.gov.in/site_en/Updates.php"
     fetch_frequency_hours = 24
     requires_pdf_extraction = True
 
@@ -25,18 +25,22 @@ class EPFOScraper(BaseScraper):
                 href = link.get("href", "")
                 title = link.get_text(strip=True)[:200]
                 
+                # Strict filtering constraint for MSME Compliance Value (Exclude internal admin/tenders)
+                noise_words = ["tender", "recruitment", "vacancy", "syllabus", "auction", "seniority", "promotion", "empanelment", "appointment", "sports", "result"]
+                is_noise = any(kw in title.lower() or kw in href.lower() for kw in noise_words)
+                
                 is_matched = (
-                    href.lower().endswith(".pdf") or
-                    any(kw in href.lower() or kw in title.lower() for kw in ["circular", "notification", "order", "rule", "amendment", "gazette"])
+                    href.lower().endswith(".pdf") and not is_noise and
+                    any(kw in href.lower() or kw in title.lower() for kw in ["circular", "notification", "order", "rule", "amendment", "gazette", "compliance", "guideline", "pension", "contribution"])
                 )
                 
                 if is_matched and title:
-                    full_url = href if href.startswith("http") else f"{self.base_url.rstrip('/')}/{href.lstrip('/')}"
+                    full_url = href if href.startswith("http") else f"{self.base_url.rsplit('/', 1)[0]}/{href.lstrip('/')}"
                     documents.append(RawDocument(
                         url=full_url,
-                        title=title,
+                        title=title[:200],
                         raw_text=title,
-                        content_type="application/pdf" if href.lower().endswith(".pdf") else "text/html"
+                        content_type="application/pdf"
                     ))
             logger.info("EPFOScraper fetch complete", doc_count=len(documents))
         except Exception as e:
