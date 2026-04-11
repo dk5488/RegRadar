@@ -297,6 +297,40 @@ class DocumentReview(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════
+#  SCRAPER HEALTH
+# ═══════════════════════════════════════════════════════════════════════
+
+class SourceHealthResponse(BaseModel):
+    id: UUID
+    name: str
+    short_code: str
+    is_active: bool
+    last_fetched_at: Optional[datetime]
+    last_successful_fetch_at: Optional[datetime]
+    last_error: Optional[str]
+    consecutive_failures: int
+    fetch_frequency_hours: int
+
+    class Config:
+        from_attributes = True
+
+class ScraperRunResponse(BaseModel):
+    id: UUID
+    source_id: UUID
+    started_at: datetime
+    finished_at: Optional[datetime]
+    success: Optional[bool]
+    documents_found: int
+    new_documents: int
+    changed_documents: int
+    error_message: Optional[str]
+    duration_seconds: Optional[float]
+
+    class Config:
+        from_attributes = True
+
+
+# ═══════════════════════════════════════════════════════════════════════
 #  GENERIC
 # ═══════════════════════════════════════════════════════════════════════
 
