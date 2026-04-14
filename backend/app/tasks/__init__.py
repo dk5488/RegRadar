@@ -454,6 +454,7 @@ def _get_scraper_instance(source):
         from app.scrapers.state.gujarat_scraper import GujaratScraper
         from app.scrapers.state.kerala_scraper import KeralaScraper
         from app.scrapers.state.uttarpradesh_scraper import UttarPradeshScraper
+        from app.scrapers.state.telangana_scraper import TelanganaScraper
 
         SCRAPER_REGISTRY['sebi_scraper'] = SEBIScraper
         SCRAPER_REGISTRY['epfo_scraper'] = EPFOScraper
@@ -471,6 +472,7 @@ def _get_scraper_instance(source):
         SCRAPER_REGISTRY['gujarat_scraper'] = GujaratScraper
         SCRAPER_REGISTRY['kerala_scraper'] = KeralaScraper
         SCRAPER_REGISTRY['uttarpradesh_scraper'] = UttarPradeshScraper
+        SCRAPER_REGISTRY['telangana_scraper'] = TelanganaScraper
     except ImportError:
         pass
 
