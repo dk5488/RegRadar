@@ -25,12 +25,15 @@ class TamilNaduScraper(BaseScraper):
                 href = link.get("href", "")
                 title = link.get_text(strip=True)[:200]
                 
-                is_matched = (
-                    href.lower().endswith(".pdf") or
-                    any(kw in href.lower() or kw in title.lower() for kw in ["circular", "notification", "order", "rule", "amendment", "gazette"])
-                )
+                if not title or len(title) < 4:
+                    parent = link.parent
+                    if parent:
+                        title = parent.get_text(strip=True)[:200]
+                        
+                if not title or len(title) < 4 or href.startswith("javascript:"):
+                    continue
                 
-                if is_matched and title:
+                if self.is_valuable_compliance_document(title, href):
                     full_url = href if href.startswith("http") else f"{self.base_url.rstrip('/')}/{href.lstrip('/')}"
                     documents.append(RawDocument(
                         url=full_url,
