@@ -152,7 +152,10 @@ class BaseScraper(abc.ABC):
             "sports", "result", "vigilance", "awareness", "presentation", 
             "contest", "yatra", "organisational structure", "download the", 
             "read", "event", "seminar", "holiday", "celebration", "award",
-            "offline-payment-process", "helpkit"
+            "offline-payment-process", "helpkit", "website policy", "hyperlinking policy",
+            "copyright policy", "privacy policy", "terms and conditions", "disclaimer",
+            "contact us", "feedback", "faq", "help", "about us", "sitemap", "gallery",
+            "hyperlink policy", "hyperlinking policy"
         ]
         
         if any(re.search(rf'\b{re.escape(noise)}\b', combined) for noise in noise_words):
