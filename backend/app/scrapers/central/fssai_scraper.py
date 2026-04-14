@@ -15,7 +15,7 @@ class FSSAIScraper(BaseScraper):
     Essential for food-business MSMEs.
     """
     source_name = "FSSAI — Food Safety and Standards Authority"
-    base_url = "https://www.fssai.gov.in/advisories-orders.php"
+    base_url = "https://www.fssai.gov.in/cms/advisories.php"
     fetch_frequency_hours = 24
     requires_pdf_extraction = True
 
@@ -31,16 +31,17 @@ class FSSAIScraper(BaseScraper):
             # FSSAI often uses tables for advisories
             for link in soup.find_all("a", href=True):
                 href = link.get("href", "")
-                title = link.get_text(strip=True)[:200]
+                link_text = link.get_text(strip=True)
                 
                 # Check for PDF or advisory links
                 is_doc = href.lower().endswith(".pdf") or "upload" in href.lower()
                 
-                if not title or len(title) < 5:
-                    # Try to get title from row if text is empty
-                    parent_row = link.find_parent("tr")
-                    if parent_row:
-                        title = parent_row.get_text(" ", strip=True)[:200]
+                # FSSAI titles often in the same table row
+                parent_row = link.find_parent("tr")
+                if parent_row:
+                    title = parent_row.get_text(" ", strip=True)[:300]
+                else:
+                    title = link_text[:200]
 
                 if is_doc and self.is_valuable_compliance_document(title, href):
                     full_url = self._resolve_url(href)
