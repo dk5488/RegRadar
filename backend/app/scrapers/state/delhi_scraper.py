@@ -25,12 +25,16 @@ class DelhiScraper(BaseScraper):
                 href = link.get("href", "")
                 title = link.get_text(strip=True)[:200]
                 
-                is_matched = (
-                    href.lower().endswith(".pdf") or
-                    any(kw in href.lower() or kw in title.lower() for kw in ["circular", "notification", "order", "rule", "amendment", "gazette"])
-                )
+                if not title or len(title) < 4:
+                    # sometimes the text is outside the a tag, let's grab parent text
+                    parent = link.parent
+                    if parent:
+                        title = parent.get_text(strip=True)[:200]
                 
-                if is_matched and title:
+                if not title or len(title) < 4 or href.startswith("javascript:"):
+                    continue
+                    
+                if self.is_valuable_compliance_document(title, href):
                     full_url = href if href.startswith("http") else f"{self.base_url.rstrip('/')}/{href.lstrip('/')}"
                     documents.append(RawDocument(
                         url=full_url,
