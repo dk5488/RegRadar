@@ -28,8 +28,7 @@ class MaharashtraScraper(BaseScraper):
     requires_ocr_fallback = False
 
     SECONDARY_URLS = [
-        "https://mahagst.gov.in",
-        "https://egazette.maharashtra.gov.in"
+        "https://mahagst.gov.in"
     ]
 
     async def fetch(self) -> List[RawDocument]:
