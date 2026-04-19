@@ -21,13 +21,14 @@ class KarnatakaScraper(BaseScraper):
     """
 
     source_name = "Karnataka State Government"
-    base_url = "https://labour.karnataka.gov.in"
+    base_url = "https://labour.karnataka.gov.in/48/department-notification/en"
     fetch_frequency_hours = 72  # State sites change less frequently (twice weekly)
     requires_pdf_extraction = True
     requires_ocr_fallback = False
 
     SECONDARY_URLS = [
-        "https://ctax.kar.nic.in"
+        "https://labour.karnataka.gov.in/49/circulars/en",
+        "https://gst.kar.nic.in/index.html"
     ]
 
     async def fetch(self) -> List[RawDocument]:
@@ -73,19 +74,16 @@ class KarnatakaScraper(BaseScraper):
             href = link.get("href", "")
             title = link.get_text(strip=True)[:200]
 
-            # Look for explicit rules, notifications, or direct PDFs
-            is_matched = (
-                href.lower().endswith(".pdf") or
-                any(kw in href.lower() or kw in title.lower() for kw in ["notification", "circular", "wage", "gst", "amendment"])
-            )
+            if not title or len(title) < 5:
+                continue
 
-            if is_matched:
+            if self.is_valuable_compliance_document(title, href):
                 full_url = self._resolve_url(href, base_url)
                 documents.append(
                     RawDocument(
                         url=full_url,
-                        title=title or "Karnataka Notification",
-                        raw_text=title or "",
+                        title=title,
+                        raw_text=title,
                         content_type="application/pdf" if href.lower().endswith(".pdf") else "text/html"
                     )
                 )
@@ -93,10 +91,11 @@ class KarnatakaScraper(BaseScraper):
         return documents
 
     def _resolve_url(self, href: str, base: str) -> str:
+        href = href.strip()
         if href.startswith("http"):
             return href
         if href.startswith("/"):
             from urllib.parse import urlparse
             p = urlparse(base)
             return f"{p.scheme}://{p.netloc}{href}"
-        return f"{base}/{href}"
+        return f"{base.rstrip('/')}/{href}"
