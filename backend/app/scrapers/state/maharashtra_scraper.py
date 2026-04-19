@@ -72,18 +72,16 @@ class MaharashtraScraper(BaseScraper):
             href = link.get("href", "")
             title = link.get_text(strip=True)[:200]
 
-            is_matched = (
-                href.lower().endswith(".pdf") or
-                any(kw in href.lower() or kw in title.lower() for kw in ["circular", "gazette", "notification"])
-            )
+            if not title or len(title) < 5:
+                continue
 
-            if is_matched:
+            if self.is_valuable_compliance_document(title, href):
                 full_url = self._resolve_url(href, base_url)
                 documents.append(
                     RawDocument(
                         url=full_url,
-                        title=title or "Maharashtra Notification",
-                        raw_text=title or "",
+                        title=title,
+                        raw_text=title,
                         content_type="application/pdf" if href.lower().endswith(".pdf") else "text/html"
                     )
                 )
@@ -91,10 +89,11 @@ class MaharashtraScraper(BaseScraper):
         return documents
 
     def _resolve_url(self, href: str, base: str) -> str:
+        href = href.strip()
         if href.startswith("http"):
             return href
         if href.startswith("/"):
             from urllib.parse import urlparse
             p = urlparse(base)
             return f"{p.scheme}://{p.netloc}{href}"
-        return f"{base}/{href}"
+        return f"{base.rstrip('/')}/{href}"
