@@ -243,4 +243,18 @@ REGULATORY_SOURCES = [
         "requires_pdf_extraction": True,
         "requires_ocr_fallback": False,
     },
+    {
+        "name": "Andhra Pradesh State Government",
+        "short_code": "AP_GOVT",
+        "base_url": "https://apegazette.cgg.gov.in",
+        "secondary_urls": [
+            "https://apct.gov.in/gst-info",
+            "https://www.apindustries.gov.in/APIndus/Default.aspx"
+        ],
+        "fetch_method": "http_scraper",
+        "fetch_frequency_hours": 72,
+        "scraper_module_name": "andhra_pradesh_scraper",
+        "requires_pdf_extraction": True,
+        "requires_ocr_fallback": False,
+    },
 ]
