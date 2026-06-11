@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import AppLayout from './components/layout/AppLayout';
 import { USER_ROLES } from './utils/constants';
 
 // ── Page imports (placeholders for now, replaced module-by-module) ────
@@ -56,109 +57,76 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* ── Smart Dashboard Redirect ──────────────────────────── */}
+            {/* ── Authenticated Routes with AppLayout ───────────────── */}
             <Route
-              path="/"
               element={
                 <ProtectedRoute>
-                  <DashboardRedirect />
+                  <AppLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              {/* ── Smart Dashboard Redirect ──────────────────────────── */}
+              <Route path="/" element={<DashboardRedirect />} />
 
-            {/* ── MSME Owner Routes ────────────────────────────────── */}
-            <Route
-              path="/onboarding"
-              element={
-                <ProtectedRoute>
-                  <OnboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/alerts"
-              element={
-                <ProtectedRoute>
-                  <AlertInboxPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/alerts/:alertId"
-              element={
-                <ProtectedRoute>
-                  <AlertDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/calendar"
-              element={
-                <ProtectedRoute>
-                  <CalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfileSettingsPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* ── MSME Owner Routes ────────────────────────────────── */}
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/alerts" element={<AlertInboxPage />} />
+              <Route path="/alerts/:alertId" element={<AlertDetailPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/profile" element={<ProfileSettingsPage />} />
 
-            {/* ── CA Firm Routes ────────────────────────────────────── */}
-            <Route
-              path="/ca/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                  <CADashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ca/clients"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                  <ClientPortfolioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ca/review"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                  <DocumentReviewPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* ── CA Firm Routes ────────────────────────────────────── */}
+              <Route
+                path="/ca/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                    <CADashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ca/clients"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                    <ClientPortfolioPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ca/review"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                    <DocumentReviewPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* ── Admin Routes ─────────────────────────────────────── */}
-            <Route
-              path="/admin/scrapers"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                  <ScraperHealthPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/runs"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                  <ScraperRunsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                  <UserManagementPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* ── Admin Routes ─────────────────────────────────────── */}
+              <Route
+                path="/admin/scrapers"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                    <ScraperHealthPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/runs"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                    <ScraperRunsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                    <UserManagementPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
             {/* ── Error Routes ─────────────────────────────────────── */}
             <Route path="/unauthorized" element={<UnauthorizedPage />} />

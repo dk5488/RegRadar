@@ -1,0 +1,211 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RegRadar — Navbar Styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.navbar {
+  height: var(--navbar-height);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bg-glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ── Mobile Menu Button ── */
+.mobile-menu-btn {
+  display: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  padding: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: var(--radius-md);
+}
+
+.mobile-menu-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+}
+
+/* ── Icon Buttons ── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  transition: all var(--transition-fast);
+}
+
+.icon-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-error-500);
+  border-radius: 50%;
+  border: 2px solid var(--bg-glass);
+}
+
+/* ── Profile Menu ── */
+.profile-menu {
+  position: relative;
+}
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+.profile-btn:hover {
+  background: var(--bg-surface-hover);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-bold);
+  font-size: var(--text-md);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.profile-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.profile-role {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 480px) {
+  .profile-info {
+    display: none;
+  }
+  .profile-btn {
+    padding: var(--space-1);
+  }
+}
+
+/* ── Dropdown ── */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  width: 240px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-2) 0;
+  overflow: hidden;
+  animation-duration: 0.2s; /* Faster animation for dropdown */
+}
+
+.dropdown-header {
+  padding: var(--space-3) var(--space-4);
+}
+
+.dropdown-name {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.dropdown-email {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-secondary);
+  margin: var(--space-2) 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.dropdown-item svg {
+  font-size: 1.25rem;
+  color: var(--text-tertiary);
+}
+
+.dropdown-item:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover svg {
+  color: var(--text-secondary);
+}
+
+.dropdown-item.text-danger {
+  color: var(--color-error-500);
+}
+
+.dropdown-item.text-danger svg {
+  color: var(--color-error-500);
+}
+
+.dropdown-item.text-danger:hover {
+  background: var(--color-urgency-critical-bg);
+}
