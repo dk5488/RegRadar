@@ -1,0 +1,219 @@
+# RegRadar — Entity-Relationship (ER) Diagram
+
+The ER diagram shows all database tables, their columns, data types, and relationships.
+
+```mermaid
+erDiagram
+    users {
+        UUID id PK
+        VARCHAR email UK
+        VARCHAR hashed_password
+        VARCHAR full_name
+        VARCHAR phone
+        ENUM role
+        BOOLEAN is_active
+        BOOLEAN is_verified
+        UUID ca_firm_id FK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    ca_firms {
+        UUID id PK
+        VARCHAR firm_name
+        VARCHAR registration_number
+        VARCHAR contact_email
+        VARCHAR contact_phone
+        TEXT address
+        VARCHAR city
+        ENUM state
+        ENUM subscription_tier
+        INTEGER max_client_profiles
+        BOOLEAN is_active
+        VARCHAR custom_brand_name
+        VARCHAR custom_domain
+        VARCHAR logo_url
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    business_profiles {
+        UUID id PK
+        VARCHAR business_name
+        ENUM business_type
+        ENUM industry_sector
+        VARCHAR industry_sector_other
+        VARCHAR nic_code
+        ENUM registration_state
+        JSONB operating_states
+        ENUM udyam_category
+        ENUM employee_count_band
+        ENUM annual_turnover_band
+        ENUM gst_status
+        BOOLEAN has_export_activity
+        BOOLEAN has_manufacturing_unit
+        BOOLEAN handles_food_products
+        JSONB existing_licences
+        UUID ca_firm_id FK
+        ENUM preferred_language
+        JSONB alert_channels
+        VARCHAR whatsapp_number
+        VARCHAR email_address
+        UUID owner_user_id FK
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    sources {
+        UUID id PK
+        VARCHAR name UK
+        VARCHAR short_code UK
+        VARCHAR base_url
+        JSONB secondary_urls
+        VARCHAR fetch_method
+        INTEGER fetch_frequency_hours
+        VARCHAR scraper_module_name
+        BOOLEAN requires_pdf_extraction
+        BOOLEAN requires_ocr_fallback
+        BOOLEAN is_active
+        TIMESTAMP last_fetched_at
+        TIMESTAMP last_successful_fetch_at
+        TEXT last_error
+        INTEGER consecutive_failures
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    documents {
+        UUID id PK
+        UUID source_id FK
+        VARCHAR url
+        VARCHAR title
+        TEXT raw_text
+        VARCHAR content_hash
+        VARCHAR previous_hash
+        VARCHAR raw_pdf_s3_key
+        VARCHAR extraction_method
+        INTEGER page_count
+        INTEGER word_count
+        ENUM status
+        TEXT processing_error
+        JSONB llm_extraction
+        FLOAT confidence_score
+        UUID reviewer_id FK
+        TIMESTAMP reviewed_at
+        TEXT review_notes
+        JSONB approved_extraction
+        TIMESTAMP fetched_at
+        TIMESTAMP first_seen_at
+        TIMESTAMP last_changed_at
+        TIMESTAMP processed_at
+    }
+
+    compliance_items {
+        UUID id PK
+        VARCHAR compliance_id UK
+        VARCHAR title
+        TEXT description
+        TEXT summary_plain_english
+        TEXT what_you_need_to_do
+        VARCHAR regulatory_body
+        VARCHAR regulation_reference
+        VARCHAR notification_number
+        JSONB applicable_if
+        JSONB not_applicable_if
+        VARCHAR frequency
+        VARCHAR due_date_logic
+        JSONB alert_trigger_days_before
+        TEXT penalty_for_non_compliance
+        ENUM urgency_level
+        TIMESTAMP effective_date
+        TIMESTAMP compliance_deadline
+        UUID source_document_id FK
+        BOOLEAN is_amendment
+        VARCHAR amends_compliance_id
+        BOOLEAN is_verified
+        UUID verified_by_id FK
+        TIMESTAMP verified_at
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    alerts {
+        UUID id PK
+        UUID compliance_item_id FK
+        UUID business_profile_id FK
+        VARCHAR alert_title
+        TEXT alert_body
+        ENUM language
+        ENUM status
+        TEXT acknowledgement_note
+        TIMESTAMP acknowledged_at
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    delivery_logs {
+        UUID id PK
+        UUID alert_id FK
+        ENUM channel
+        VARCHAR recipient
+        TIMESTAMP sent_at
+        TIMESTAMP delivered_at
+        TIMESTAMP read_at
+        TIMESTAMP failed_at
+        TEXT error_message
+        VARCHAR external_message_id
+        INTEGER retry_count
+        TIMESTAMP created_at
+    }
+
+    scraper_runs {
+        UUID id PK
+        UUID source_id FK
+        TIMESTAMP started_at
+        TIMESTAMP finished_at
+        BOOLEAN success
+        INTEGER documents_found
+        INTEGER new_documents
+        INTEGER changed_documents
+        TEXT error_message
+        FLOAT duration_seconds
+    }
+
+    %% Relationships
+    ca_firms ||--o{ users : "employs"
+    ca_firms ||--o{ business_profiles : "manages"
+    users ||--o{ business_profiles : "owns"
+    sources ||--o{ documents : "produces"
+    sources ||--o{ scraper_runs : "tracked by"
+    documents ||--o| compliance_items : "generates"
+    users ||--o{ documents : "reviews"
+    users ||--o{ compliance_items : "verifies"
+    compliance_items ||--o{ alerts : "triggers"
+    business_profiles ||--o{ alerts : "receives"
+    alerts ||--o{ delivery_logs : "delivered via"
+```
+
+## Key Relationships
+
+| Relationship | Cardinality | Description |
+|---|---|---|
+| `ca_firms` → `users` | One-to-Many | A CA firm has multiple users (reviewers, firm admins) |
+| `ca_firms` → `business_profiles` | One-to-Many | A CA firm manages many MSME client profiles |
+| `users` → `business_profiles` | One-to-Many | An MSME owner can own multiple business profiles |
+| `sources` → `documents` | One-to-Many | Each regulatory source produces many fetched documents |
+| `sources` → `scraper_runs` | One-to-Many | Each source has historical scraper execution records |
+| `documents` → `compliance_items` | One-to-One | Each approved document creates exactly one compliance item |
+| `compliance_items` → `alerts` | One-to-Many | One regulation generates alerts for many matching businesses |
+| `business_profiles` → `alerts` | One-to-Many | Each business can receive many regulatory alerts |
+| `alerts` → `delivery_logs` | One-to-Many | Each alert is delivered via multiple channels (Email, WhatsApp, SMS) |
+
+## Unique Constraints
+
+- `alerts` has a `UNIQUE(compliance_item_id, business_profile_id)` — prevents duplicate alerts for the same regulation + business pair
+- `sources.name` and `sources.short_code` are both unique
+- `compliance_items.compliance_id` is unique (e.g., `"GST-001"`)
+- `users.email` is unique

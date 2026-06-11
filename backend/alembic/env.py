@@ -3,8 +3,14 @@ Alembic migration environment — auto-generates migrations from SQLAlchemy mode
 """
 
 from logging.config import fileConfig
+import os
+import sys
+
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+
+# Add the current directory to sys.path
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import all models so Alembic detects them
 from app.core.database import Base
