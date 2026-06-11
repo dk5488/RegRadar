@@ -26,6 +26,8 @@ def _run_async(coro):
     try:
         return loop.run_until_complete(coro)
     finally:
+        from app.core.database import engine
+        loop.run_until_complete(engine.dispose())
         loop.close()
 
 
@@ -118,8 +120,9 @@ async def _process_document_async(task, document_id: str):
             }
 
         except Exception as e:
-            doc.status = DocumentStatus.FAILED
-            doc.processing_error = str(e)
+            if 'doc' in locals() and doc:
+                doc.status = DocumentStatus.FAILED
+                doc.processing_error = str(e)
             await db.commit()
             logger.error("Document processing failed", document_id=document_id, error=str(e))
             raise task.retry(exc=e)

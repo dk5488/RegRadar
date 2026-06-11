@@ -30,8 +30,10 @@ class Settings(BaseSettings):
     # ── LLM ──────────────────────────────────────────────────────────
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
-    LLM_PROVIDER: str = "openai"  # "openai" | "anthropic"
+    GEMINI_API_KEY: str = ""
+    LLM_PROVIDER: str = "gemini"  # "openai" | "anthropic" | "gemini"
     LLM_MODEL: str = "gpt-4o"
+    GEMINI_MODEL: str = "gemini-3-pro"
 
     # ── Auth / Security ──────────────────────────────────────────────
     SECRET_KEY: str = "change-this-to-a-random-64-char-string"

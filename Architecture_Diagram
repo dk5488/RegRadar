@@ -1,0 +1,100 @@
+# RegRadar — Overall Architecture Diagram
+
+This diagram shows the **end-to-end data pipeline** — the 7-stage compliance flow from scraping to alert delivery, with all the async task handoffs.
+
+```mermaid
+graph LR
+    subgraph Stage1["Stage 1: Scheduling"]
+        S1["⏰ APScheduler<br/>reads sources table"]
+    end
+
+    subgraph Stage2["Stage 2: Scraping"]
+        S2A["🕷️ Central Scrapers<br/>(CBIC, MCA, RBI, SEBI,<br/>EPFO, ESIC, DPIIT,<br/>IncomeTax, Gazette,<br/>DGFT, FSSAI, BIS, IRDAI)"]
+        S2B["🕷️ State Scrapers<br/>(Karnataka, Maharashtra,<br/>Tamil Nadu, Delhi,<br/>Gujarat, Kerala,<br/>UP, Telangana, AP)"]
+    end
+
+    subgraph Stage3["Stage 3: Deduplication"]
+        S3["🔍 Content Hash Check<br/>(SHA-256 comparison)"]
+    end
+
+    subgraph Stage4["Stage 4: LLM Extraction"]
+        S4["🧠 LLM Processing<br/>(Prompt Template 1)<br/>Gemini → OpenAI fallback"]
+    end
+
+    subgraph Stage5["Stage 5: CA Review"]
+        S5["👨‍💼 CA Review Queue<br/>(Review Pending →<br/>Approved / Rejected)"]
+    end
+
+    subgraph Stage6["Stage 6: Applicability"]
+        S6["🎯 Applicability Engine<br/>(JSONB rule matching:<br/>applicable_if ∧ ¬not_applicable_if)"]
+    end
+
+    subgraph Stage7["Stage 7: Alert Delivery"]
+        S7A["🔔 Alert Generator<br/>(LLM Prompt Template 2)<br/>Personalised per business"]
+        S7B["📤 Multi-Channel Delivery<br/>📧 Email (SendGrid)<br/>📱 WhatsApp (Interakt)<br/>📲 SMS (future)"]
+    end
+
+    %% Flow connections
+    S1 -->|"run_scraper.delay()"| S2A
+    S1 -->|"run_scraper.delay()"| S2B
+    S2A --> S3
+    S2B --> S3
+    S3 -->|"New/Changed docs only"| S4
+    S3 -->|"Unchanged: skip"| SKIP["⏭️ Skip"]
+    S4 -->|"confidence ≥ 0.75"| S5
+    S4 -->|"confidence < 0.75<br/>Priority review ⚠️"| S5
+    S5 -->|"Approved ✅"| S6
+    S5 -->|"Rejected ❌"| REJECT["🗑️ Discard"]
+    S6 -->|"Matched profiles"| S7A
+    S7A --> S7B
+
+    %% Celery task boundaries
+    S1 -.->|"📨 Redis Queue"| S2A
+    S3 -.->|"📨 process_document"| S4
+    S5 -.->|"📨 generate_alerts"| S6
+    S7A -.->|"📨 deliver_alert"| S7B
+
+    classDef stage1 fill:#ffeaa7,stroke:#fdcb6e,color:#333
+    classDef stage2 fill:#dfe6e9,stroke:#b2bec3,color:#333
+    classDef stage3 fill:#74b9ff,stroke:#0984e3,color:#333
+    classDef stage4 fill:#a29bfe,stroke:#6c5ce7,color:#fff
+    classDef stage5 fill:#fd79a8,stroke:#e84393,color:#fff
+    classDef stage6 fill:#55efc4,stroke:#00b894,color:#333
+    classDef stage7 fill:#fab1a0,stroke:#e17055,color:#333
+    classDef skip fill:#b2bec3,stroke:#636e72,color:#333
+
+    class S1 stage1
+    class S2A,S2B stage2
+    class S3 stage3
+    class S4 stage4
+    class S5 stage5
+    class S6 stage6
+    class S7A,S7B stage7
+    class SKIP,REJECT skip
+```
+
+## Pipeline Stage Details
+
+| Stage | Trigger | Celery Task | Input | Output | Rate Limit |
+|-------|---------|-------------|-------|--------|------------|
+| **1. Schedule** | APScheduler interval | — | `sources` table | `run_scraper` messages | Per source `fetch_frequency_hours` |
+| **2. Scrape** | `run_scraper.delay()` | `regradar.run_scraper` | Source ID | `List[RawDocument]` | 1 retry, 600s delay |
+| **3. Dedup** | Inside `run_scraper` | (same task) | Content hash | New/changed docs only | — |
+| **4. LLM Extract** | `process_document.delay()` | `regradar.process_document` | Document ID | `LLMExtractionResult` | **50/hour** |
+| **5. CA Review** | Human action (API) | — | Review queue | Approved/Rejected | — |
+| **6. Match** | `generate_alerts.delay()` | `regradar.generate_alerts` | ComplianceItem ID | Matched profiles | 2 retries |
+| **7. Deliver** | `deliver_alert.delay()` | `regradar.deliver_alert` | Alert ID | DeliveryLogs | 3 retries, 300s delay |
+
+## Task Chaining Pattern
+
+```
+APScheduler
+    └──▶ run_scraper (for each source)
+            └──▶ process_document (for each new/changed doc)
+                    └──▶ [HUMAN: CA Review via API]
+                            └──▶ generate_alerts_for_item (for each approved item)
+                                    └──▶ deliver_alert_task (for each created alert)
+```
+
+> [!NOTE]
+> The pipeline is **not** a single synchronous chain. Each `└──▶` arrow represents a **separate Celery task** enqueued via `.delay()`. This gives fault isolation — if one LLM call fails, it doesn't block other documents from being processed.

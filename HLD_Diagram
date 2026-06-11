@@ -1,0 +1,126 @@
+# RegRadar — High-Level Design (HLD) Diagram
+
+The HLD shows the **system-level architecture** — external actors, major subsystems, infrastructure components, and the data flow between them.
+
+```mermaid
+graph TB
+    subgraph External["External Systems"]
+        GOV["🏛️ Government Websites<br/>(MCA, CBIC, RBI, SEBI, EPFO,<br/>State Portals × 8)"]
+        LLM_API["🤖 LLM Provider<br/>(Gemini / OpenAI / Anthropic)"]
+        SENDGRID["📧 SendGrid<br/>(Email Delivery)"]
+        WHATSAPP["📱 WhatsApp BSP<br/>(Interakt API)"]
+        S3["☁️ AWS S3<br/>(PDF Storage)"]
+    end
+
+    subgraph Clients["Client Layer"]
+        WEB["🌐 Web Dashboard<br/>(React SPA)"]
+        MOBILE["📱 WhatsApp<br/>Client"]
+        EMAIL_CLIENT["📧 Email<br/>Client"]
+    end
+
+    subgraph RegRadar["RegRadar Platform"]
+        subgraph API_Layer["API Layer (FastAPI)"]
+            AUTH["Auth Service<br/>(JWT + RBAC)"]
+            REST["REST API<br/>(/api/v1/*)"]
+        end
+
+        subgraph Processing["Async Processing Layer"]
+            SCHEDULER["⏰ APScheduler<br/>(Cron Trigger)"]
+            CELERY_W["⚙️ Celery Workers<br/>(Task Executors)"]
+        end
+
+        subgraph Services["Service Layer"]
+            SCRAPERS["🕷️ Scraper Registry<br/>(20+ scrapers)"]
+            LLM_SVC["🧠 LLM Processor<br/>(Extraction + Alert Gen)"]
+            APP_ENGINE["🎯 Applicability Engine<br/>(Rule Matching)"]
+            ALERT_GEN["🔔 Alert Generator<br/>(Personalisation)"]
+            DELIVERY["📤 Delivery Service<br/>(Multi-Channel)"]
+        end
+
+        subgraph Data["Data Layer"]
+            POSTGRES[("🐘 PostgreSQL 16<br/>Business Data")]
+            REDIS[("🔴 Redis 7<br/>Task Queue + Cache")]
+        end
+    end
+
+    %% Client interactions
+    WEB --> REST
+    REST --> AUTH
+
+    %% Scheduler flow
+    SCHEDULER -->|"reads active sources"| POSTGRES
+    SCHEDULER -->|"enqueues run_scraper"| REDIS
+
+    %% Celery worker flow
+    REDIS -->|"dequeues tasks"| CELERY_W
+    CELERY_W --> SCRAPERS
+    CELERY_W --> LLM_SVC
+    CELERY_W --> APP_ENGINE
+    CELERY_W --> ALERT_GEN
+    CELERY_W --> DELIVERY
+
+    %% Scraper interactions
+    SCRAPERS -->|"HTTP scraping"| GOV
+    SCRAPERS -->|"stores documents"| POSTGRES
+
+    %% LLM interactions
+    LLM_SVC -->|"API calls"| LLM_API
+    LLM_SVC -->|"reads/writes documents"| POSTGRES
+
+    %% Applicability + Alert flow
+    APP_ENGINE -->|"reads profiles + rules"| POSTGRES
+    ALERT_GEN -->|"writes alerts"| POSTGRES
+
+    %% Delivery
+    DELIVERY -->|"sends email"| SENDGRID
+    DELIVERY -->|"sends WhatsApp"| WHATSAPP
+    DELIVERY -->|"logs delivery"| POSTGRES
+
+    %% Notifications to clients
+    SENDGRID -.->|"email alert"| EMAIL_CLIENT
+    WHATSAPP -.->|"WhatsApp alert"| MOBILE
+
+    %% S3 for PDFs
+    SCRAPERS -.->|"stores raw PDFs"| S3
+
+    %% Styling
+    classDef external fill:#f9e0e0,stroke:#c44,color:#333
+    classDef client fill:#e0f0e0,stroke:#4a4,color:#333
+    classDef api fill:#e0e0f9,stroke:#44c,color:#333
+    classDef processing fill:#f9f0e0,stroke:#c84,color:#333
+    classDef service fill:#f0e0f9,stroke:#84c,color:#333
+    classDef data fill:#e0f9f9,stroke:#4cc,color:#333
+
+    class GOV,LLM_API,SENDGRID,WHATSAPP,S3 external
+    class WEB,MOBILE,EMAIL_CLIENT client
+    class AUTH,REST api
+    class SCHEDULER,CELERY_W processing
+    class SCRAPERS,LLM_SVC,APP_ENGINE,ALERT_GEN,DELIVERY service
+    class POSTGRES,REDIS data
+```
+
+## System Components Summary
+
+| Layer | Component | Technology | Responsibility |
+|-------|-----------|------------|----------------|
+| **Client** | Web Dashboard | React SPA | CA/MSME user interface |
+| **Client** | WhatsApp/Email | SendGrid + Interakt | Alert receipt channels |
+| **API** | Auth Service | FastAPI + JWT | Authentication & RBAC (4 roles) |
+| **API** | REST API | FastAPI | 7 route groups, CRUD operations |
+| **Processing** | APScheduler | Python AsyncIO | Time-based scraper triggering |
+| **Processing** | Celery Workers | Celery 5.x | Async task execution (4 task types) |
+| **Service** | Scraper Registry | curl_cffi + tenacity | 20+ government website scrapers |
+| **Service** | LLM Processor | Gemini/OpenAI/Anthropic | Regulatory text extraction + alert generation |
+| **Service** | Applicability Engine | Pure Python | JSONB rule matching against business profiles |
+| **Service** | Alert Generator | Python + LLM | Personalised alert creation per business |
+| **Service** | Delivery Service | SendGrid + httpx | Multi-channel alert dispatch |
+| **Data** | PostgreSQL 16 | asyncpg + SQLAlchemy | 8 business tables, ACID persistence |
+| **Data** | Redis 7 | Celery broker | Task queue (DB 1) + result backend (DB 2) |
+
+## Key Design Decisions
+
+1. **Async-first**: FastAPI + asyncpg + async Celery wrappers for non-blocking I/O
+2. **Scraper isolation**: Each government source has its own scraper class (20+)
+3. **LLM fallback chain**: Gemini → OpenAI → Mock (graceful degradation)
+4. **Content dedup**: SHA-256 hashing prevents re-processing unchanged documents
+5. **Rate limiting**: 50 LLM calls/hour enforced by Celery task rate limits

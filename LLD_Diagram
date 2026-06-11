@@ -1,0 +1,371 @@
+# RegRadar — Low-Level Design (LLD) Diagram
+
+The LLD shows **module-level internals** — class hierarchies, function signatures, data flows within components, and detailed interaction sequences.
+
+---
+
+## 1. Module Dependency Graph
+
+```mermaid
+graph TD
+    subgraph Entry["Entry Points"]
+        MAIN["main.py<br/>(FastAPI app)"]
+        SCHED["tasks/scheduler.py<br/>(APScheduler loop)"]
+        CELERY_ENTRY["celery_app.py<br/>(Celery instance)"]
+    end
+
+    subgraph Core["core/"]
+        CONFIG["config.py<br/>(Settings via pydantic-settings)"]
+        DB["database.py<br/>(AsyncEngine + SessionLocal)"]
+        SECURITY["security.py<br/>(JWT encode/decode)"]
+        DEPS["deps.py<br/>(Auth deps + RoleChecker)"]
+        LOGGING["logging.py<br/>(structlog setup)"]
+        CELERY_APP["celery_app.py<br/>(Celery broker config)"]
+    end
+
+    subgraph Models["models/"]
+        ENUMS["enums.py<br/>(19 enum types)"]
+        ORM["models.py<br/>(8 SQLAlchemy tables)"]
+    end
+
+    subgraph Schemas_["schemas/"]
+        SCHEMAS["schemas.py<br/>(Pydantic request/response)"]
+    end
+
+    subgraph Services["services/"]
+        LLM["llm_processor.py<br/>extract_regulatory_content()<br/>generate_alert_text()"]
+        APPLICABILITY["applicability_engine.py<br/>find_applicable_profiles()<br/>check_profile_applicability()"]
+        ALERT_GEN["alert_generator.py<br/>generate_alerts_for_compliance_item()<br/>create_delivery_logs_for_alert()"]
+        DELIVERY["delivery.py<br/>deliver_alert()<br/>deliver_via_email()<br/>deliver_via_whatsapp()"]
+    end
+
+    subgraph Tasks["tasks/"]
+        TASKS_INIT["__init__.py<br/>run_scraper()<br/>process_document()<br/>generate_alerts_for_item()<br/>deliver_alert_task()"]
+    end
+
+    subgraph Scrapers["scrapers/"]
+        BASE_S["base.py<br/>(BaseScraper ABC)"]
+        CENTRAL["central/<br/>(13 scrapers)"]
+        STATE["state/<br/>(9 scrapers)"]
+    end
+
+    subgraph Routes["api/routes/"]
+        R_AUTH["auth.py"]
+        R_BP["business_profiles.py"]
+        R_COMP["compliance.py"]
+        R_ALERTS["alerts.py"]
+        R_DOCS["documents.py"]
+        R_CA["ca_dashboard.py"]
+        R_HEALTH["scraper_health.py"]
+    end
+
+    %% Dependencies
+    MAIN --> CONFIG
+    MAIN --> LOGGING
+    MAIN --> R_AUTH & R_BP & R_COMP & R_ALERTS & R_DOCS & R_CA & R_HEALTH
+
+    SCHED --> DB & LOGGING & ORM & TASKS_INIT
+
+    CELERY_APP --> CONFIG
+    TASKS_INIT --> CELERY_APP & DB & LOGGING & ORM & ENUMS
+    TASKS_INIT --> LLM & ALERT_GEN & DELIVERY
+    TASKS_INIT --> BASE_S & CENTRAL & STATE
+
+    DB --> CONFIG
+    DEPS --> DB & SECURITY & ORM & ENUMS
+    ORM --> DB & ENUMS
+    SCHEMAS --> ENUMS
+
+    LLM --> CONFIG & LOGGING & SCHEMAS
+    APPLICABILITY --> LOGGING & ORM
+    ALERT_GEN --> LOGGING & ORM & ENUMS & APPLICABILITY & LLM
+    DELIVERY --> CONFIG & LOGGING & ORM & ENUMS
+
+    R_AUTH & R_BP & R_COMP & R_ALERTS & R_DOCS & R_CA & R_HEALTH --> DEPS & DB & ORM & SCHEMAS
+
+    BASE_S --> LOGGING
+    CENTRAL --> BASE_S
+    STATE --> BASE_S
+```
+
+---
+
+## 2. Celery Task Execution Detail
+
+```mermaid
+sequenceDiagram
+    participant SCH as APScheduler
+    participant RED as Redis (Broker)
+    participant CW as Celery Worker
+    participant TASK as run_scraper()
+    participant ASYNC as _run_scraper_async()
+    participant PG as PostgreSQL
+    participant SCRAPER as BaseScraper subclass
+    participant GOV as Govt Website
+
+    SCH->>RED: run_scraper.delay(source_id)<br/>serialize to JSON message
+    RED->>CW: Dequeue task message
+    CW->>TASK: Execute run_scraper(source_id)
+    TASK->>ASYNC: _run_async(_run_scraper_async())
+    Note over TASK,ASYNC: Creates new asyncio event loop<br/>Runs coroutine synchronously
+
+    ASYNC->>PG: SELECT Source WHERE id = source_id
+    PG-->>ASYNC: Source row
+
+    ASYNC->>PG: INSERT ScraperRun (started_at)
+    ASYNC->>ASYNC: _get_scraper_instance(source)<br/>Lookup SCRAPER_REGISTRY[source.scraper_module_name]
+
+    ASYNC->>SCRAPER: scraper.fetch()
+    SCRAPER->>GOV: safe_get(url)<br/>curl_cffi + random UA + retry × 3
+    GOV-->>SCRAPER: HTML/PDF response
+    SCRAPER-->>ASYNC: List[RawDocument]
+
+    loop For each RawDocument
+        ASYNC->>PG: SELECT Document WHERE source_id AND url
+        alt Document exists
+            ASYNC->>ASYNC: Compare content_hash
+            alt Hash changed
+                ASYNC->>PG: UPDATE Document (hash, raw_text, status=FETCHED)
+                ASYNC->>RED: process_document.delay(doc_id)
+            else Hash same
+                Note over ASYNC: Skip (no change)
+            end
+        else New document
+            ASYNC->>PG: INSERT Document (status=FETCHED)
+            ASYNC->>RED: process_document.delay(doc_id)
+        end
+    end
+
+    ASYNC->>PG: UPDATE Source (last_fetched_at, consecutive_failures=0)
+    ASYNC->>PG: UPDATE ScraperRun (success=True, counts)
+    ASYNC->>PG: COMMIT
+    ASYNC-->>CW: Return result dict
+```
+
+---
+
+## 3. Scraper Class Hierarchy
+
+```mermaid
+classDiagram
+    class BaseScraper {
+        <<abstract>>
+        +source_id: str
+        +source_name: str
+        +base_url: str
+        +fetch_frequency_hours: int
+        +requires_pdf_extraction: bool
+        +requires_ocr_fallback: bool
+        +request_timeout: int
+        -_session: AsyncSession
+        +__init__(proxy_url)
+        +get_client() AsyncSession
+        +safe_get(url) Response
+        +fetch()* List~RawDocument~
+        +compute_hash(text) str
+        +close()
+        +is_valuable_compliance_document(title, url) bool
+        -_get_headers() dict
+    }
+
+    class RawDocument {
+        +url: str
+        +title: str
+        +raw_content: bytes
+        +raw_text: str
+        +content_type: str
+        +fetched_at: datetime
+        +metadata: dict
+    }
+
+    class CBICScraper { +fetch() }
+    class MCAScraper { +fetch() }
+    class RBIScraper { +fetch() }
+    class SEBIScraper { +fetch() }
+    class EPFOScraper { +fetch() }
+    class ESICScraper { +fetch() }
+    class LabourCentralScraper { +fetch() }
+    class DPIITScraper { +fetch() }
+    class IncomeTaxScraper { +fetch() }
+    class GazetteScraper { +fetch() }
+    class DGFTScraper { +fetch() }
+    class FSSAIScraper { +fetch() }
+    class BISScraper { +fetch() }
+    class IRDAIScraper { +fetch() }
+    class KarnatakaScraper { +fetch() }
+    class MaharashtraScraper { +fetch() }
+    class TamilNaduScraper { +fetch() }
+    class DelhiScraper { +fetch() }
+    class GujaratScraper { +fetch() }
+    class KeralaScraper { +fetch() }
+    class UttarPradeshScraper { +fetch() }
+    class TelanganaScraper { +fetch() }
+    class AndhraPradeshScraper { +fetch() }
+
+    BaseScraper <|-- CBICScraper
+    BaseScraper <|-- MCAScraper
+    BaseScraper <|-- RBIScraper
+    BaseScraper <|-- SEBIScraper
+    BaseScraper <|-- EPFOScraper
+    BaseScraper <|-- ESICScraper
+    BaseScraper <|-- LabourCentralScraper
+    BaseScraper <|-- DPIITScraper
+    BaseScraper <|-- IncomeTaxScraper
+    BaseScraper <|-- GazetteScraper
+    BaseScraper <|-- DGFTScraper
+    BaseScraper <|-- FSSAIScraper
+    BaseScraper <|-- BISScraper
+    BaseScraper <|-- IRDAIScraper
+    BaseScraper <|-- KarnatakaScraper
+    BaseScraper <|-- MaharashtraScraper
+    BaseScraper <|-- TamilNaduScraper
+    BaseScraper <|-- DelhiScraper
+    BaseScraper <|-- GujaratScraper
+    BaseScraper <|-- KeralaScraper
+    BaseScraper <|-- UttarPradeshScraper
+    BaseScraper <|-- TelanganaScraper
+    BaseScraper <|-- AndhraPradeshScraper
+
+    BaseScraper --> RawDocument : produces
+```
+
+### Scraper Registry Mapping
+
+| Module Key | Class | Type | Source |
+|-----------|-------|------|--------|
+| `cbic_scraper` | `CBICScraper` | Central | CBIC / GST Council |
+| `mca_scraper` | `MCAScraper` | Central | Ministry of Corporate Affairs |
+| `rbi_scraper` | `RBIScraper` | Central | Reserve Bank of India |
+| `sebi_scraper` | `SEBIScraper` | Central | Securities Exchange Board |
+| `epfo_scraper` | `EPFOScraper` | Central | Employees' PF Organization |
+| `esic_scraper` | `ESICScraper` | Central | Employees' State Insurance |
+| `labour_central_scraper` | `LabourCentralScraper` | Central | Ministry of Labour |
+| `dpiit_scraper` | `DPIITScraper` | Central | Dept of Industrial Policy |
+| `incometax_scraper` | `IncomeTaxScraper` | Central | Income Tax Dept |
+| `gazette_scraper` | `GazetteScraper` | Central | Gazette of India |
+| `dgft_scraper` | `DGFTScraper` | Central | Director General Foreign Trade |
+| `fssai_scraper` | `FSSAIScraper` | Central | Food Safety Authority |
+| `bis_scraper` | `BISScraper` | Central | Bureau of Indian Standards |
+| `irdai_scraper` | `IRDAIScraper` | Central | Insurance Regulatory Authority |
+| `karnataka_scraper` | `KarnatakaScraper` | State | Karnataka Govt |
+| `maharashtra_scraper` | `MaharashtraScraper` | State | Maharashtra Govt |
+| `tamilnadu_scraper` | `TamilNaduScraper` | State | Tamil Nadu Govt |
+| `delhi_scraper` | `DelhiScraper` | State | Delhi Govt |
+| `gujarat_scraper` | `GujaratScraper` | State | Gujarat Govt |
+| `kerala_scraper` | `KeralaScraper` | State | Kerala Govt |
+| `uttarpradesh_scraper` | `UttarPradeshScraper` | State | UP Govt |
+| `telangana_scraper` | `TelanganaScraper` | State | Telangana Govt |
+| `andhra_pradesh_scraper` | `AndhraPradeshScraper` | State | AP Govt |
+
+---
+
+## 4. API Layer Architecture
+
+```mermaid
+graph TB
+    subgraph FastAPI["FastAPI Application (main.py)"]
+        subgraph Middleware["Middleware"]
+            CORS["CORSMiddleware<br/>Origins: localhost:3000, :8000"]
+        end
+
+        subgraph Auth_Routes["/api/v1/auth"]
+            POST_REG["POST /register"]
+            POST_LOGIN["POST /login"]
+        end
+
+        subgraph Profile_Routes["/api/v1/profiles"]
+            POST_PROF["POST / (create)"]
+            GET_PROFS["GET / (list mine)"]
+            GET_PROF["GET /{id}"]
+            PUT_PROF["PUT /{id}"]
+            DEL_PROF["DELETE /{id}"]
+        end
+
+        subgraph Compliance_Routes["/api/v1/compliance"]
+            GET_ITEMS["GET / (list)"]
+            GET_ITEM["GET /{id}"]
+            POST_ITEM["POST / (admin)"]
+        end
+
+        subgraph Alert_Routes["/api/v1/alerts"]
+            GET_ALERTS["GET / (my alerts)"]
+            GET_ALERT["GET /{id}"]
+            POST_ACK["POST /{id}/acknowledge"]
+        end
+
+        subgraph Doc_Routes["/api/v1/documents"]
+            GET_DOCS["GET / (list)"]
+            GET_DOC["GET /{id}"]
+            POST_INGEST["POST /ingest"]
+        end
+
+        subgraph CA_Routes["/api/v1/ca"]
+            GET_QUEUE["GET /review-queue"]
+            POST_APPROVE["POST /{id}/approve"]
+            POST_REJECT["POST /{id}/reject"]
+        end
+
+        subgraph Health_Routes["/api/v1/health"]
+            GET_SOURCES["GET /sources"]
+            GET_RUNS["GET /runs"]
+        end
+    end
+
+    subgraph Guards["Auth Guards (deps.py)"]
+        JWT["get_current_user<br/>(JWT decode)"]
+        RC["RoleChecker<br/>(allowed_roles list)"]
+        RA["require_admin"]
+        RCA["require_ca"]
+        RMSME["require_msme_or_admin"]
+    end
+
+    POST_REG -.-> |"No auth"| Guards
+    POST_LOGIN -.-> |"No auth"| Guards
+
+    POST_PROF & GET_PROFS & GET_PROF --> JWT
+    GET_ALERTS & GET_ALERT & POST_ACK --> JWT
+    POST_APPROVE & POST_REJECT --> RCA
+    POST_ITEM --> RA
+    GET_QUEUE --> RCA
+    GET_SOURCES & GET_RUNS --> RA
+```
+
+### API Route Inventory
+
+| Route Group | Endpoint | Method | Auth | Role Guard |
+|---|---|---|---|---|
+| **Auth** | `/api/v1/auth/register` | POST | None | — |
+| **Auth** | `/api/v1/auth/login` | POST | None | — |
+| **Profiles** | `/api/v1/profiles` | POST | JWT | Any authenticated |
+| **Profiles** | `/api/v1/profiles` | GET | JWT | Owner-scoped |
+| **Profiles** | `/api/v1/profiles/{id}` | GET | JWT | Owner-scoped |
+| **Profiles** | `/api/v1/profiles/{id}` | PUT | JWT | Owner-scoped |
+| **Profiles** | `/api/v1/profiles/{id}` | DELETE | JWT | Owner-scoped |
+| **Compliance** | `/api/v1/compliance` | GET | JWT | Any authenticated |
+| **Compliance** | `/api/v1/compliance/{id}` | GET | JWT | Any authenticated |
+| **Compliance** | `/api/v1/compliance` | POST | JWT | Admin only |
+| **Alerts** | `/api/v1/alerts` | GET | JWT | User-scoped |
+| **Alerts** | `/api/v1/alerts/{id}` | GET | JWT | User-scoped |
+| **Alerts** | `/api/v1/alerts/{id}/acknowledge` | POST | JWT | User-scoped |
+| **Documents** | `/api/v1/documents` | GET | JWT | CA/Admin |
+| **Documents** | `/api/v1/documents/{id}` | GET | JWT | CA/Admin |
+| **Documents** | `/api/v1/documents/ingest` | POST | JWT | Admin |
+| **CA Dashboard** | `/api/v1/ca/review-queue` | GET | JWT | CA roles |
+| **CA Dashboard** | `/api/v1/ca/{id}/approve` | POST | JWT | CA roles |
+| **CA Dashboard** | `/api/v1/ca/{id}/reject` | POST | JWT | CA roles |
+| **Health** | `/api/v1/health/sources` | GET | JWT | Admin |
+| **Health** | `/api/v1/health/runs` | GET | JWT | Admin |
+| **Health** | `/health` | GET | None | — |
+
+---
+
+## 5. Celery Task Configuration
+
+| Task Name | Function | Max Retries | Retry Delay | Rate Limit | Binds |
+|---|---|---|---|---|---|
+| `regradar.run_scraper` | `run_scraper` | 1 | 600s | — | ✓ |
+| `regradar.process_document` | `process_document` | 2 | 60s | 50/hour | ✓ |
+| `regradar.generate_alerts` | `generate_alerts_for_item` | 2 | 120s | — | ✓ |
+| `regradar.deliver_alert` | `deliver_alert_task` | 3 | 300s | — | ✓ |
+
+All tasks use `_run_async()` helper to bridge sync Celery with async SQLAlchemy/service code.
