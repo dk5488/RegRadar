@@ -26,10 +26,11 @@ import { CADashboardPage } from './pages/ca/CADashboardPage';
 import { ClientPortfolioPage } from './pages/ca/ClientPortfolioPage';
 import { DocumentReviewPage } from './pages/ca/DocumentReviewPage';
 
+import { ScraperHealthPage } from './pages/admin/ScraperHealthPage';
+import { ScraperRunsPage } from './pages/admin/ScraperRunsPage';
+import { UserManagementPage } from './pages/admin/UserManagementPage';
+
 import {
-  ScraperHealthPage,
-  ScraperRunsPage,
-  UserManagementPage,
   NotFoundPage,
   UnauthorizedPage,
 } from './pages/Placeholders';

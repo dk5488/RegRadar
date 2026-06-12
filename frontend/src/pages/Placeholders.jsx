@@ -22,16 +22,7 @@ export function PlaceholderPage({ title, subtitle }) {
 
 
 
-// ── Admin placeholders ──────────────────────────────────────────────────
-export function ScraperHealthPage() {
-  return <PlaceholderPage title="Scraper Health" subtitle="Coming in Module F-41" />;
-}
-export function ScraperRunsPage() {
-  return <PlaceholderPage title="Scraper Runs" subtitle="Coming in Module F-42" />;
-}
-export function UserManagementPage() {
-  return <PlaceholderPage title="User Management" subtitle="Coming in Module F-43" />;
-}
+
 
 // ── Error pages ─────────────────────────────────────────────────────────
 export function NotFoundPage() {
