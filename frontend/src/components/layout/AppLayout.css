@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RegRadar — App Layout Styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-primary);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Important to prevent flex items from overflowing */
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-base);
+}
+
+/* When sidebar is collapsed, we must target it. Since the collapsed state 
+   is inside Sidebar.jsx, we can either pass it up or use a CSS trick.
+   For simplicity, we let the sidebar push the content by changing its position
+   to relative, but since it's fixed, we need a CSS variable or generic selector.
+   Let's rely on the body/app-layout knowing, OR we just let the sidebar overlap.
+   Wait, a fixed sidebar means main-content needs margin-left. 
+   Let's adjust this: The sidebar wrapper is relative/fixed.
+*/
+
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: var(--z-sticky);
+}
+
+/* Because Sidebar changes width dynamically, the main-content margin-left 
+   must be synchronized. A common pattern is passing collapsed state up to AppLayout,
+   but we can also use flexbox without fixed positioning if we prefer. 
+   For now, we'll assume the sidebar handles its own width and main-content 
+   adapts via flex if we remove fixed.
+   Let's fix this: make sidebar wrapper statically placed in flex layout on desktop.
+*/
+
+@media (min-width: 769px) {
+  .sidebar-wrapper {
+    position: relative;
+    z-index: 10;
+  }
+  
+  .sidebar-wrapper :first-child {
+    position: sticky;
+    top: 0;
+  }
+  
+  .main-content {
+    margin-left: 0; /* Let flex handle it */
+  }
+}
+
+.page-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: calc(var(--z-sticky) - 1);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .mobile-overlay {
+    display: block;
+  }
+
+  .sidebar-wrapper {
+    position: fixed;
+    z-index: var(--z-modal);
+  }
+}
