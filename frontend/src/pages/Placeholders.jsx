@@ -21,16 +21,6 @@ export function PlaceholderPage({ title, subtitle }) {
 
 
 
-// ── CA placeholders ─────────────────────────────────────────────────────
-export function CADashboardPage() {
-  return <PlaceholderPage title="CA Dashboard" subtitle="Coming in Module F-38" />;
-}
-export function ClientPortfolioPage() {
-  return <PlaceholderPage title="Client Portfolio" subtitle="Coming in Module F-39" />;
-}
-export function DocumentReviewPage() {
-  return <PlaceholderPage title="Document Review" subtitle="Coming in Module F-40" />;
-}
 
 // ── Admin placeholders ──────────────────────────────────────────────────
 export function ScraperHealthPage() {

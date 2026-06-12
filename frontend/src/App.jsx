@@ -22,10 +22,11 @@ import { AlertDetailPage } from './pages/alerts/AlertDetailPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { ProfileSettingsPage } from './pages/profile/ProfileSettingsPage';
 
+import { CADashboardPage } from './pages/ca/CADashboardPage';
+import { ClientPortfolioPage } from './pages/ca/ClientPortfolioPage';
+import { DocumentReviewPage } from './pages/ca/DocumentReviewPage';
+
 import {
-  CADashboardPage,
-  ClientPortfolioPage,
-  DocumentReviewPage,
   ScraperHealthPage,
   ScraperRunsPage,
   UserManagementPage,
