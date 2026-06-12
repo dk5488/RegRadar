@@ -11,9 +11,10 @@ import AppLayout from './components/layout/AppLayout';
 import { USER_ROLES } from './utils/constants';
 
 // ── Page imports (placeholders for now, replaced module-by-module) ────
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+
 import {
-  LoginPage,
-  RegisterPage,
   OnboardingPage,
   AlertInboxPage,
   AlertDetailPage,

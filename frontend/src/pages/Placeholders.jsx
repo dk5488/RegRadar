@@ -16,13 +16,6 @@ export function PlaceholderPage({ title, subtitle }) {
   );
 }
 
-// ── Auth placeholders ───────────────────────────────────────────────────
-export function LoginPage() {
-  return <PlaceholderPage title="Login" subtitle="Coming in Module F-32" />;
-}
-export function RegisterPage() {
-  return <PlaceholderPage title="Register" subtitle="Coming in Module F-32" />;
-}
 
 // ── MSME placeholders ───────────────────────────────────────────────────
 export function AlertInboxPage() {
