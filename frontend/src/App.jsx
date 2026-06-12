@@ -14,8 +14,9 @@ import { USER_ROLES } from './utils/constants';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 
+import { OnboardingPage } from './pages/onboarding/OnboardingPage';
+
 import {
-  OnboardingPage,
   AlertInboxPage,
   AlertDetailPage,
   CalendarPage,
@@ -58,6 +59,16 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
+            {/* ── Authenticated Standalone Routes ───────────────────── */}
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <OnboardingPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* ── Authenticated Routes with AppLayout ───────────────── */}
             <Route
               element={
@@ -70,7 +81,6 @@ function App() {
               <Route path="/" element={<DashboardRedirect />} />
 
               {/* ── MSME Owner Routes ────────────────────────────────── */}
-              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/alerts" element={<AlertInboxPage />} />
               <Route path="/alerts/:alertId" element={<AlertDetailPage />} />
               <Route path="/calendar" element={<CalendarPage />} />

@@ -30,9 +30,7 @@ export function CalendarPage() {
 export function ProfileSettingsPage() {
   return <PlaceholderPage title="Profile Settings" subtitle="Coming in Module F-37" />;
 }
-export function OnboardingPage() {
-  return <PlaceholderPage title="Business Onboarding" subtitle="Coming in Module F-33" />;
-}
+
 
 // ── CA placeholders ─────────────────────────────────────────────────────
 export function CADashboardPage() {
