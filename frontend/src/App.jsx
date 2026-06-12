@@ -19,9 +19,10 @@ import { OnboardingPage } from './pages/onboarding/OnboardingPage';
 import { AlertInboxPage } from './pages/alerts/AlertInboxPage';
 import { AlertDetailPage } from './pages/alerts/AlertDetailPage';
 
+import { CalendarPage } from './pages/calendar/CalendarPage';
+import { ProfileSettingsPage } from './pages/profile/ProfileSettingsPage';
+
 import {
-  CalendarPage,
-  ProfileSettingsPage,
   CADashboardPage,
   ClientPortfolioPage,
   DocumentReviewPage,
