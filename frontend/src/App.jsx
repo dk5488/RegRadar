@@ -16,9 +16,10 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
 
+import { AlertInboxPage } from './pages/alerts/AlertInboxPage';
+import { AlertDetailPage } from './pages/alerts/AlertDetailPage';
+
 import {
-  AlertInboxPage,
-  AlertDetailPage,
   CalendarPage,
   ProfileSettingsPage,
   CADashboardPage,

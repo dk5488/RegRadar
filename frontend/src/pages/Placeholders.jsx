@@ -18,12 +18,7 @@ export function PlaceholderPage({ title, subtitle }) {
 
 
 // ── MSME placeholders ───────────────────────────────────────────────────
-export function AlertInboxPage() {
-  return <PlaceholderPage title="Alert Inbox" subtitle="Coming in Module F-34" />;
-}
-export function AlertDetailPage() {
-  return <PlaceholderPage title="Alert Detail" subtitle="Coming in Module F-35" />;
-}
+
 export function CalendarPage() {
   return <PlaceholderPage title="Compliance Calendar" subtitle="Coming in Module F-36" />;
 }
