@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RegRadar — CA Portal Styles
+   Professional dashboard, client management, and review interface.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ca-page {
+  padding: var(--space-6) var(--space-8);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  animation: fade-in var(--transition-base);
+}
+
+.ca-header {
+  margin-bottom: var(--space-8);
+}
+
+.ca-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.ca-subtitle {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+/* ── Dashboard Stats ─────────────────────────────────────────────────── */
+.ca-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+}
+
+.ca-stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.ca-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-400);
+}
+
+.ca-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.ca-stat-card.primary::before { background: var(--gradient-primary); }
+.ca-stat-card.warning::before { background: var(--color-warning-500); }
+.ca-stat-card.success::before { background: var(--color-success-500); }
+
+.ca-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.ca-stat-value {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* ── Client List / Table ─────────────────────────────────────────────── */
+.ca-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+  box-shadow: var(--shadow-sm);
+}
+
+.ca-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.ca-section-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+/* Custom Table */
+.ca-table-wrapper {
+  overflow-x: auto;
+}
+
+.ca-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.ca-table th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: var(--font-semibold);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.ca-table td {
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-secondary);
+  vertical-align: middle;
+}
+
+.ca-table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.ca-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.ca-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Table specific styling */
+.client-name {
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.client-industry {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  margin-top: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+}
+
+.status-badge.healthy { background: rgba(34, 197, 94, 0.1); color: var(--color-success-600); }
+.status-badge.attention { background: rgba(245, 158, 11, 0.1); color: var(--color-warning-600); }
+.status-badge.critical { background: rgba(239, 68, 68, 0.1); color: var(--color-error-600); }
+
+/* ── Review Interface ────────────────────────────────────────────────── */
+.review-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-doc-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.review-doc-meta {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-secondary);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.review-action-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-6));
+  box-shadow: var(--shadow-sm);
+}
+
+.review-input-group {
+  margin-bottom: var(--space-5);
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  resize: vertical;
+  transition: all var(--transition-base);
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.btn-approve {
+  background: var(--color-success-600);
+  color: white;
+}
+.btn-approve:hover {
+  background: var(--color-success-500);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-reject {
+  background: var(--bg-tertiary);
+  color: var(--color-error-500);
+  border: 1px solid var(--border-secondary);
+}
+.btn-reject:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--color-error-500);
+}
