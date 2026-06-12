@@ -1,0 +1,235 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RegRadar — Calendar Page Styles
+   Agenda-style timeline, date cards, and premium aesthetic.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.calendar-page {
+  padding: var(--space-6) var(--space-8);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  animation: fade-in var(--transition-base);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-8);
+}
+
+.calendar-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.calendar-subtitle {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+/* ── Calendar Layout ─────────────────────────────────────────────────── */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Timeline (Main Content) ─────────────────────────────────────────── */
+.timeline-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.month-group {
+  margin-bottom: var(--space-8);
+}
+
+.month-group:last-child {
+  margin-bottom: 0;
+}
+
+.month-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.month-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-secondary);
+}
+
+/* Timeline Items */
+.timeline-item {
+  display: flex;
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-item:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--color-primary-400);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.timeline-item.critical::before { background: var(--color-urgency-critical); }
+.timeline-item.high::before { background: var(--color-urgency-high); }
+.timeline-item.medium::before { background: var(--color-urgency-medium); }
+.timeline-item.low::before { background: var(--color-urgency-low); }
+
+/* Date Box */
+.date-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.date-day {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.date-month {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: var(--space-1);
+}
+
+/* Event Details */
+.event-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.event-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.event-authority {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.event-actions {
+  margin-top: var(--space-2);
+}
+
+.event-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-status.pending {
+  background: var(--color-warning-500);
+  color: #fff;
+}
+
+.event-status.completed {
+  background: var(--color-success-600);
+  color: #fff;
+}
+
+/* ── Sidebar (Mini Calendar / Stats) ─────────────────────────────────── */
+.calendar-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.sidebar-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+/* Summary list */
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.summary-count {
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-secondary);
+}

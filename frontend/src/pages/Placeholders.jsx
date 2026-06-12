@@ -19,12 +19,6 @@ export function PlaceholderPage({ title, subtitle }) {
 
 // ── MSME placeholders ───────────────────────────────────────────────────
 
-export function CalendarPage() {
-  return <PlaceholderPage title="Compliance Calendar" subtitle="Coming in Module F-36" />;
-}
-export function ProfileSettingsPage() {
-  return <PlaceholderPage title="Profile Settings" subtitle="Coming in Module F-37" />;
-}
 
 
 // ── CA placeholders ─────────────────────────────────────────────────────
