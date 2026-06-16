@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { SkeletonRow } from '../../components/common/Skeleton';
+import { Button } from '../../components/common/Button';
 import './CAStyles.css';
 
 // ── Mock Data ─────────────────────────────────────────────────────────
@@ -12,6 +14,19 @@ const MOCK_CLIENTS = [
 
 export function ClientPortfolioPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInviting, setIsInviting] = useState(false);
+
+  useEffect(() => {
+    // Simulate API fetch delay
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleInvite = () => {
+    setIsInviting(true);
+    setTimeout(() => setIsInviting(false), 2000);
+  };
   
   const filteredClients = MOCK_CLIENTS.filter(client => 
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -25,7 +40,9 @@ export function ClientPortfolioPage() {
           <h1 className="ca-title">Client Portfolio</h1>
           <p className="ca-subtitle">Manage your MSME clients and view their compliance health.</p>
         </div>
-        <button className="btn btn-primary">+ Invite Client</button>
+        <Button variant="primary" onClick={handleInvite} isLoading={isInviting}>
+          + Invite Client
+        </Button>
       </div>
 
       <div className="ca-section">
@@ -53,33 +70,42 @@ export function ClientPortfolioPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map(client => (
-                <tr key={client.id}>
-                  <td data-label="Client Name">
-                    <div className="client-name">{client.name}</div>
-                    <div className="client-industry" style={{ fontFamily: 'var(--font-mono)' }}>{client.id}</div>
-                  </td>
-                  <td data-label="Industry">{client.industry}</td>
-                  <td data-label="State">{client.state}</td>
-                  <td data-label="Active Alerts">
-                    <span style={{ color: client.alerts > 0 ? 'var(--color-error-500)' : 'inherit', fontWeight: client.alerts > 0 ? 'bold' : 'normal' }}>
-                      {client.alerts}
-                    </span>
-                  </td>
-                  <td data-label="Health Status">
-                    <span className={`status-badge ${client.status.toLowerCase()}`}>
-                      {client.status}
-                    </span>
-                  </td>
-                  <td data-label="Action">
-                    <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '12px' }}>
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              
-              {filteredClients.length === 0 && (
+              {isLoading ? (
+                // Render Skeleton Rows when loading
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    <td colSpan="6" style={{ padding: '0 var(--space-4)' }}>
+                      <SkeletonRow />
+                    </td>
+                  </tr>
+                ))
+              ) : filteredClients.length > 0 ? (
+                filteredClients.map(client => (
+                  <tr key={client.id}>
+                    <td data-label="Client Name">
+                      <div className="client-name">{client.name}</div>
+                      <div className="client-industry" style={{ fontFamily: 'var(--font-mono)' }}>{client.id}</div>
+                    </td>
+                    <td data-label="Industry">{client.industry}</td>
+                    <td data-label="State">{client.state}</td>
+                    <td data-label="Active Alerts">
+                      <span style={{ color: client.alerts > 0 ? 'var(--color-error-500)' : 'inherit', fontWeight: client.alerts > 0 ? 'bold' : 'normal' }}>
+                        {client.alerts}
+                      </span>
+                    </td>
+                    <td data-label="Health Status">
+                      <span className={`status-badge ${client.status.toLowerCase()}`}>
+                        {client.status}
+                      </span>
+                    </td>
+                    <td data-label="Action">
+                      <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '12px' }}>
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--text-muted)' }}>
                     No clients found matching your search.
