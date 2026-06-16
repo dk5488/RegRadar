@@ -250,3 +250,55 @@
 .role-badge.admin { background: rgba(99, 102, 241, 0.15); color: var(--color-primary-400); }
 .role-badge.ca { background: rgba(6, 182, 212, 0.15); color: var(--color-accent-400); }
 .role-badge.msme { background: rgba(148, 163, 184, 0.15); color: var(--color-neutral-400); }
+
+/* ── Mobile Responsive Table & Touch Targets ── */
+@media (max-width: 768px) {
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table thead {
+    display: none; /* Hide headers on mobile */
+  }
+
+  .admin-table tr {
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    padding: var(--space-2);
+  }
+
+  .admin-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-secondary);
+    padding: var(--space-3);
+    text-align: right;
+  }
+
+  .admin-table td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+  }
+
+  /* Pseudo labels to replace hidden headers */
+  .admin-table td::before {
+    content: attr(data-label);
+    font-weight: var(--font-semibold);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-right: var(--space-4);
+    text-align: left;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: var(--space-4);
+  }
+}

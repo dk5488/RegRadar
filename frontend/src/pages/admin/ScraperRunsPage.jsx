@@ -87,25 +87,25 @@ export function ScraperRunsPage() {
             </thead>
             <tbody>
               <tr>
-                <td style={{ fontFamily: 'var(--font-mono)' }}>job_a1b2c3</td>
-                <td>CBIC</td>
-                <td><span style={{ color: 'var(--color-success-500)' }}>Success</span></td>
-                <td>4.2s</td>
-                <td>1</td>
+                <td data-label="Run ID" style={{ fontFamily: 'var(--font-mono)' }}>job_a1b2c3</td>
+                <td data-label="Target">CBIC</td>
+                <td data-label="Status"><span style={{ color: 'var(--color-success-500)' }}>Success</span></td>
+                <td data-label="Duration">4.2s</td>
+                <td data-label="Docs Extracted">1</td>
               </tr>
               <tr>
-                <td style={{ fontFamily: 'var(--font-mono)' }}>job_x9y8z7</td>
-                <td>ESIC</td>
-                <td><span style={{ color: 'var(--color-error-500)' }}>Failed</span></td>
-                <td>12.1s</td>
-                <td>0</td>
+                <td data-label="Run ID" style={{ fontFamily: 'var(--font-mono)' }}>job_x9y8z7</td>
+                <td data-label="Target">ESIC</td>
+                <td data-label="Status"><span style={{ color: 'var(--color-error-500)' }}>Failed</span></td>
+                <td data-label="Duration">12.1s</td>
+                <td data-label="Docs Extracted">0</td>
               </tr>
               <tr>
-                <td style={{ fontFamily: 'var(--font-mono)' }}>job_m5n6o7</td>
-                <td>MCA</td>
-                <td><span style={{ color: 'var(--color-success-500)' }}>Success</span></td>
-                <td>18.5s</td>
-                <td>14</td>
+                <td data-label="Run ID" style={{ fontFamily: 'var(--font-mono)' }}>job_m5n6o7</td>
+                <td data-label="Target">MCA</td>
+                <td data-label="Status"><span style={{ color: 'var(--color-success-500)' }}>Success</span></td>
+                <td data-label="Duration">18.5s</td>
+                <td data-label="Docs Extracted">14</td>
               </tr>
             </tbody>
           </table>

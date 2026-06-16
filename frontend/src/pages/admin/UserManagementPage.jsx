@@ -52,15 +52,15 @@ export function UserManagementPage() {
           <tbody>
             {filteredUsers.map(user => (
               <tr key={user.id}>
-                <td style={{ fontWeight: '500' }}>{user.name}</td>
-                <td style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
-                <td>
+                <td data-label="Name" style={{ fontWeight: '500' }}>{user.name}</td>
+                <td data-label="Email" style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
+                <td data-label="Role">
                   <span className={`role-badge ${user.role.split('_')[0]}`}>
                     {user.role.replace(/_/g, ' ')}
                   </span>
                 </td>
-                <td style={{ color: 'var(--text-secondary)' }}>{user.lastLogin}</td>
-                <td>
+                <td data-label="Last Login" style={{ color: 'var(--text-secondary)' }}>{user.lastLogin}</td>
+                <td data-label="Status">
                   <span style={{ 
                     color: user.status === 'Active' ? 'var(--color-success-500)' : 'var(--color-error-500)',
                     fontWeight: '500' 
@@ -68,7 +68,7 @@ export function UserManagementPage() {
                     {user.status}
                   </span>
                 </td>
-                <td>
+                <td data-label="Actions">
                   <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '12px' }}>
                     Edit
                   </button>

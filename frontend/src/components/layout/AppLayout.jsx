@@ -11,45 +11,18 @@ import Navbar from './Navbar';
 import './AppLayout.css';
 
 export default function AppLayout() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileMenuOpen]);
 
   return (
     <div className="app-layout">
-      {/* Mobile Overlay */}
-      {mobileMenuOpen && (
-        <div 
-          className="mobile-overlay animate-fade-in" 
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
       {/* Sidebar Wrapper for mobile control */}
-      <div className={`sidebar-wrapper ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+      <div className="sidebar-wrapper">
         <Sidebar />
       </div>
 
       {/* Main Content Area */}
       <div className="main-content">
-        <Navbar onMenuClick={() => setMobileMenuOpen(true)} />
+        <Navbar />
         
         <main className="page-wrapper">
           <Outlet />

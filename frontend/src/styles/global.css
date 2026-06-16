@@ -109,7 +109,7 @@ body {
   font-size: var(--text-base);
   font-weight: var(--font-medium);
   line-height: 1;
-  min-height: 40px;
+  min-height: 44px; /* Touch friendly tap target */
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;

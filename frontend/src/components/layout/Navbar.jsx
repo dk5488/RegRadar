@@ -10,7 +10,7 @@ import { ROLE_LABELS } from '../../utils/constants';
 import { FiSun, FiMoon, FiUser, FiLogOut, FiMenu, FiBell } from 'react-icons/fi';
 import './Navbar.css';
 
-export default function Navbar({ onMenuClick }) {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -37,9 +37,7 @@ export default function Navbar({ onMenuClick }) {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <button className="mobile-menu-btn" onClick={onMenuClick} aria-label="Open menu">
-          <FiMenu />
-        </button>
+        {/* Placeholder for future left-side items if needed */}
       </div>
 
       <div className="navbar-right">

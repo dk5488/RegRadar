@@ -79,14 +79,25 @@
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
+    margin-bottom: 70px; /* Space for the bottom nav */
   }
   
   .mobile-overlay {
-    display: block;
+    display: none; /* Not needed for bottom nav */
   }
 
   .sidebar-wrapper {
     position: fixed;
-    z-index: var(--z-modal);
+    z-index: var(--z-sticky);
+    bottom: 0;
+    top: auto;
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Reset stickyness for children */
+  .sidebar-wrapper :first-child {
+    position: relative;
   }
 }

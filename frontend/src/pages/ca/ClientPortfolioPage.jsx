@@ -55,23 +55,23 @@ export function ClientPortfolioPage() {
             <tbody>
               {filteredClients.map(client => (
                 <tr key={client.id}>
-                  <td>
+                  <td data-label="Client Name">
                     <div className="client-name">{client.name}</div>
                     <div className="client-industry" style={{ fontFamily: 'var(--font-mono)' }}>{client.id}</div>
                   </td>
-                  <td>{client.industry}</td>
-                  <td>{client.state}</td>
-                  <td>
+                  <td data-label="Industry">{client.industry}</td>
+                  <td data-label="State">{client.state}</td>
+                  <td data-label="Active Alerts">
                     <span style={{ color: client.alerts > 0 ? 'var(--color-error-500)' : 'inherit', fontWeight: client.alerts > 0 ? 'bold' : 'normal' }}>
                       {client.alerts}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Health Status">
                     <span className={`status-badge ${client.status.toLowerCase()}`}>
                       {client.status}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Action">
                     <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '12px' }}>
                       View Details
                     </button>
