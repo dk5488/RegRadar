@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { SEO } from '../../components/common/SEO';
 import './Auth.css';
 
 export function LoginPage() {
@@ -32,6 +33,7 @@ export function LoginPage() {
 
   return (
     <div className="auth-page-container">
+      <SEO title="Login" description="Sign in to your RegRadar account." />
       {/* Background Orbs */}
       <div className="auth-bg-orb auth-bg-orb-1" />
       <div className="auth-bg-orb auth-bg-orb-2" />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SkeletonRow } from '../../components/common/Skeleton';
 import { Button } from '../../components/common/Button';
+import { SEO } from '../../components/common/SEO';
 import './CAStyles.css';
 
 // ── Mock Data ─────────────────────────────────────────────────────────
@@ -35,6 +36,7 @@ export function ClientPortfolioPage() {
 
   return (
     <div className="ca-page">
+      <SEO title="Client Portfolio" description="Manage MSME clients and view their compliance health status." />
       <div className="ca-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
           <h1 className="ca-title">Client Portfolio</h1>
