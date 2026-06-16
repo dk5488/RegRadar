@@ -10,6 +10,7 @@ import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import { ToastContainer } from './components/common/Toast';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { USER_ROLES } from './utils/constants';
 
 // ── Page imports (placeholders for now, replaced module-by-module) ────
@@ -62,8 +63,9 @@ function App() {
         <ToastProvider>
           <AuthProvider>
             <ToastContainer />
-            <Routes>
-              {/* ── Public Routes ─────────────────────────────────────── */}
+            <ErrorBoundary>
+              <Routes>
+                {/* ── Public Routes ─────────────────────────────────────── */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
@@ -149,8 +151,9 @@ function App() {
 
             {/* ── Error Routes ─────────────────────────────────────── */}
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+            </ErrorBoundary>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>
