@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { SEO } from '../../components/common/SEO';
 import './CAStyles.css';
 
 // ── Mock Data ─────────────────────────────────────────────────────────
@@ -17,6 +18,7 @@ const PENDING_REVIEWS = [
 export function CADashboardPage() {
   return (
     <div className="ca-page">
+      <SEO title="CA Dashboard" description="Overview of pending compliance reviews and client health metrics." />
       <div className="ca-header">
         <h1 className="ca-title">CA Firm Dashboard</h1>
         <p className="ca-subtitle">Overview of your client portfolio and pending regulatory reviews.</p>

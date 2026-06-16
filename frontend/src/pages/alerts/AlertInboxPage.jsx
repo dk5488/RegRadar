@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { SEO } from '../../components/common/SEO';
 import { Link } from 'react-router-dom';
 import { documentService } from '../../services/documentService';
 import './Alerts.css';
@@ -81,6 +82,7 @@ export function AlertInboxPage() {
 
   return (
     <div className="alerts-page">
+      <SEO title="Alert Inbox" description="Review your latest MSME compliance alerts." />
       <div className="page-header">
         <div>
           <h1 className="page-title">Regulatory Alerts</h1>

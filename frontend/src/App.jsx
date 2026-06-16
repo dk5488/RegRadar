@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -58,106 +59,108 @@ function DashboardRedirect() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <ToastContainer />
-            <ErrorBoundary>
-              <Routes>
-                {/* ── Public Routes ─────────────────────────────────────── */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+    <HelmetProvider>
+      <BrowserRouter>
+        <ThemeProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ToastContainer />
+              <ErrorBoundary>
+                <Routes>
+                  {/* ── Public Routes ─────────────────────────────────────── */}
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
 
-            {/* ── Authenticated Standalone Routes ───────────────────── */}
-            <Route
-              path="/onboarding"
-              element={
-                <ProtectedRoute>
-                  <OnboardingPage />
-                </ProtectedRoute>
-              }
-            />
+                  {/* ── Authenticated Standalone Routes ───────────────────── */}
+                  <Route
+                    path="/onboarding"
+                    element={
+                      <ProtectedRoute>
+                        <OnboardingPage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* ── Authenticated Routes with AppLayout ───────────────── */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* ── Smart Dashboard Redirect ──────────────────────────── */}
-              <Route path="/" element={<DashboardRedirect />} />
+                  {/* ── Authenticated Routes with AppLayout ───────────────── */}
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <AppLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    {/* ── Smart Dashboard Redirect ──────────────────────────── */}
+                    <Route path="/" element={<DashboardRedirect />} />
 
-              {/* ── MSME Owner Routes ────────────────────────────────── */}
-              <Route path="/alerts" element={<AlertInboxPage />} />
-              <Route path="/alerts/:alertId" element={<AlertDetailPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/profile" element={<ProfileSettingsPage />} />
+                    {/* ── MSME Owner Routes ────────────────────────────────── */}
+                    <Route path="/alerts" element={<AlertInboxPage />} />
+                    <Route path="/alerts/:alertId" element={<AlertDetailPage />} />
+                    <Route path="/calendar" element={<CalendarPage />} />
+                    <Route path="/profile" element={<ProfileSettingsPage />} />
 
-              {/* ── CA Firm Routes ────────────────────────────────────── */}
-              <Route
-                path="/ca/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                    <CADashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/ca/clients"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                    <ClientPortfolioPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/ca/review"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
-                    <DocumentReviewPage />
-                  </ProtectedRoute>
-                }
-              />
+                    {/* ── CA Firm Routes ────────────────────────────────────── */}
+                    <Route
+                      path="/ca/dashboard"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                          <CADashboardPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/ca/clients"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                          <ClientPortfolioPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/ca/review"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.CA_FIRM_ADMIN, USER_ROLES.CA_REVIEWER, USER_ROLES.ADMIN]}>
+                          <DocumentReviewPage />
+                        </ProtectedRoute>
+                      }
+                    />
 
-              {/* ── Admin Routes ─────────────────────────────────────── */}
-              <Route
-                path="/admin/scrapers"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                    <ScraperHealthPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/runs"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                    <ScraperRunsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/users"
-                element={
-                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-                    <UserManagementPage />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+                    {/* ── Admin Routes ─────────────────────────────────────── */}
+                    <Route
+                      path="/admin/scrapers"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                          <ScraperHealthPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/runs"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                          <ScraperRunsPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={
+                        <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                          <UserManagementPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
 
-            {/* ── Error Routes ─────────────────────────────────────── */}
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-            </ErrorBoundary>
-          </AuthProvider>
-        </ToastProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+                  {/* ── Error Routes ─────────────────────────────────────── */}
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </ErrorBoundary>
+            </AuthProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 
