@@ -6,8 +6,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
+import { ToastContainer } from './components/common/Toast';
 import { USER_ROLES } from './utils/constants';
 
 // ── Page imports (placeholders for now, replaced module-by-module) ────
@@ -57,9 +59,11 @@ function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <Routes>
-            {/* ── Public Routes ─────────────────────────────────────── */}
+        <ToastProvider>
+          <AuthProvider>
+            <ToastContainer />
+            <Routes>
+              {/* ── Public Routes ─────────────────────────────────────── */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
@@ -147,7 +151,8 @@ function App() {
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-        </AuthProvider>
+          </AuthProvider>
+        </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
