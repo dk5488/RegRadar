@@ -58,6 +58,14 @@
   transition: all var(--transition-fast);
 }
 
+.icon-btn svg {
+  transition: transform var(--transition-spring);
+}
+
+.icon-btn:active svg {
+  transform: scale(0.8) rotate(15deg);
+}
+
 .icon-btn:hover {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
